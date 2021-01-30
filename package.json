@@ -1,0 +1,154 @@
+{
+	"name": "msft-todo",
+	"displayName": "Microsoft To-Do",
+	"publisher": "tylerleonhardt",
+	"description": "",
+	"version": "0.0.1",
+	"engines": {
+		"vscode": "^1.52.0"
+	},
+	"categories": [
+		"Other"
+	],
+	"activationEvents": [
+		"onStartupFinished",
+		"onUri"
+	],
+	"main": "./out/extension.js",
+	"contributes": {
+		"commands": [
+			{
+				"command": "microsoft-todo.login",
+				"title": "Login to Microsoft To-Do"
+			},
+			{
+				"command": "microsoft-todo.refreshList",
+				"title": "Refresh list",
+				"icon": {
+					"dark": "./resources/dark/refresh.svg",
+					"light": "./resources/light/refresh.svg"
+				}
+			},
+			{
+				"command": "microsoft-todo.complete",
+				"title": "Complete task",
+				"icon": {
+					"dark": "./resources/dark/check.svg",
+					"light": "./resources/light/check.svg"
+				}
+			},
+			{
+				"command": "microsoft-todo.uncomplete",
+				"title": "Complete task",
+				"icon": {
+					"dark": "./resources/dark/check.svg",
+					"light": "./resources/light/check.svg"
+				}
+			},
+			{
+				"command": "microsoft-todo.createTask",
+				"title": "Create a task",
+				"icon": {
+					"dark": "./resources/dark/check.svg",
+					"light": "./resources/light/check.svg"
+				}
+			},
+			{
+				"command": "microsoft-todo.cancelCreateTask",
+				"title": "Cancel"
+			}
+		],
+		"viewsContainers": {
+			"activitybar": [
+				{
+					"id": "todo",
+					"title": "To-Do",
+					"icon": "./resources/dark/checklist.svg"
+				}
+			]
+		},
+		"views": {
+			"todo": [
+				{
+					"id": "microsoft-todo.taskCreateView",
+					"name": "Create task",
+					"type": "webview",
+					"visibility": "hidden",
+					"when": "showTaskCreateView"
+				},
+				{
+					"id": "microsoft-todo",
+					"name": "Microsoft To-Do",
+					"type": "tree",
+					"visibility": "visible"
+				},
+				{
+					"id": "microsoft-todo.taskDetailsView",
+					"name": "Task details",
+					"type": "webview",
+					"visibility": "hidden",
+					"when": "showTaskDetailsView"
+				}
+				
+			]
+		},
+		"viewsWelcome": [
+			{
+				"view": "microsoft-todo",
+				"contents": "Login to see your Microsoft To-Do lists.\n[Login](command:microsoft-todo.login)"
+			}
+		],
+		"menus": {
+			"view/item/context": [
+				{
+					"command": "microsoft-todo.refreshList",
+					"when": "viewItem == list",
+					"group": "inline"
+				},
+				{
+					"command": "microsoft-todo.complete",
+					"when": "viewItem == task",
+					"group": "inline"
+				}
+			],
+			"view/title": [
+				{
+					"command": "microsoft-todo.refreshList",
+					"group": "inline"
+				},
+				{
+					"command": "microsoft-todo.createTask",
+					"group": "inline"
+				}
+			]
+		}
+	},
+	"scripts": {
+		"vscode:prepublish": "yarn run compile",
+		"compile": "tsc -p ./",
+		"watch": "tsc -watch -p ./",
+		"pretest": "yarn run compile && yarn run lint",
+		"lint": "eslint src --ext ts",
+		"test": "node ./out/test/runTest.js"
+	},
+	"devDependencies": {
+		"@microsoft/microsoft-graph-types": "^1.28.0",
+		"@types/glob": "^7.1.3",
+		"@types/isomorphic-fetch": "^0.0.35",
+		"@types/mocha": "^8.0.4",
+		"@types/node": "^12.11.7",
+		"@types/vscode": "^1.52.0",
+		"@typescript-eslint/eslint-plugin": "^4.9.0",
+		"@typescript-eslint/parser": "^4.9.0",
+		"eslint": "^7.15.0",
+		"glob": "^7.1.6",
+		"mocha": "^8.1.3",
+		"typescript": "^4.1.2",
+		"vscode-test": "^1.4.1"
+	},
+	"dependencies": {
+		"@microsoft/microsoft-graph-client": "^2.2.1",
+		"axios": "^0.21.1",
+		"isomorphic-fetch":"^3.0.0"
+	}
+}
