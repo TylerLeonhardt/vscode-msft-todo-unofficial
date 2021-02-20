@@ -113,8 +113,6 @@ export class MicrosoftToDoTreeDataProvider extends vscode.Disposable implements 
 					highlights: [[0, statusLabel.length]],
 					label: statusLabel
 				}, collapse);
-
-				treeItem.label = undefined;
 				break;
 		}
 

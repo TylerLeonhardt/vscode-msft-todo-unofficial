@@ -1,8 +1,7 @@
 import { TodoTaskList } from '@microsoft/microsoft-graph-types';
 import * as vscode from 'vscode';
 import { MicrosoftToDoClientFactory } from '../clientFactories/microsoftToDoClientFactory';
-import { MicrosoftToDoContentProvider } from '../fileSystemProvider';
-import { ListNode, TaskNode } from "../todoProviders/microsoftToDoTreeDataProvider";
+import { ListNode } from "../todoProviders/microsoftToDoTreeDataProvider";
 
 export class ListOperations extends vscode.Disposable {
 	private readonly disposables: vscode.Disposable[] = [];
@@ -18,10 +17,6 @@ export class ListOperations extends vscode.Disposable {
 		this.disposables.push(vscode.commands.registerCommand(
 			'microsoft-todo-unoffcial.deleteList',
 			(list: ListNode | undefined, lists: ListNode[] | undefined) => this.deleteList(list, lists)));
-
-		this.disposables.push(vscode.commands.registerCommand('microsoft-todo-unoffcial.openList', (list: ListNode) => {
-			return this.openList(list);
-		}));
 	}
 
 	async getList(listId: string): Promise<TodoTaskList | undefined> {
@@ -99,18 +94,5 @@ export class ListOperations extends vscode.Disposable {
 		await Promise.all(promises);
 
 		await vscode.commands.executeCommand('microsoft-todo-unoffcial.refreshList');
-	}
-
-	public async openList(list: ListNode): Promise<void> {
-		// if(
-		// 	!vscode.workspace.workspaceFolders?.find(f => f.uri.scheme === MicrosoftToDoContentProvider.scheme) &&
-		// 	!vscode.workspace.updateWorkspaceFolders(0, 0, { uri: vscode.Uri.parse(`${MicrosoftToDoContentProvider.scheme}:`), name: 'Microsoft To-Do' })) {
-		// 	throw new Error('idk');
-		// }
-
-		const uri = vscode.Uri.parse(`${MicrosoftToDoContentProvider.scheme}:/${list.entity.displayName}#${list.entity.id}`);
-		const textDoc = await vscode.workspace.openTextDocument(uri);
-		await vscode.window.showTextDocument(textDoc);
-		return;
 	}
 }
