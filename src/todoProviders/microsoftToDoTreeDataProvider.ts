@@ -84,14 +84,19 @@ export class MicrosoftToDoTreeDataProvider extends vscode.Disposable implements 
 				break;
 			case 'task':
 				let label = element.entity.title || "";
+				let tooltip = `*${label}*`;
 				const dueDateTime = element.entity.dueDateTime;
 				const highlights: [number, number][] = [];
 
 				if (dueDateTime?.dateTime) {
-					const dueStr = " DUE " + new Date(dueDateTime.dateTime).toLocaleDateString() + " ";
+					const dueStr = " DUE " + new Date(dueDateTime.dateTime).toLocaleDateString() + ' ';
 					label += "  ";
 					highlights.push([label.length, label.length + dueStr.length]);
 					label += dueStr;
+				}
+
+				if (element.entity.body?.content) {
+					tooltip += `\n\n${element.entity.body.content}`;
 				}
 
 				const treeItemLabel: vscode.TreeItemLabel = {
@@ -102,6 +107,7 @@ export class MicrosoftToDoTreeDataProvider extends vscode.Disposable implements 
 				treeItem = new vscode.TreeItem(treeItemLabel, vscode.TreeItemCollapsibleState.None);
 				const status = element.entity.status === 'completed' ? 'completed' : 'notcompleted';
 				treeItem.contextValue = `${element.nodeType}-${status}`;
+				treeItem.tooltip = new vscode.MarkdownString(tooltip, true);
 				break;
 			case 'status':
 				const collapse = element.statusType === TaskStatusType.completed

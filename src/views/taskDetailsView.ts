@@ -1,3 +1,4 @@
+import { TodoTask } from '@microsoft/microsoft-graph-types';
 import * as vscode from 'vscode';
 import { MicrosoftToDoClientFactory } from '../clientFactories/microsoftToDoClientFactory';
 import { TaskNode } from '../todoProviders/microsoftToDoTreeDataProvider';
@@ -45,14 +46,25 @@ export class TaskDetailsViewProvider extends WebviewViewBase implements vscode.W
 						return await vscode.window.showErrorMessage("you're not logged in.");
 					}
 
-					// TODO: error handling
-					await client.api(`/me/todo/lists/${message.body.listId}/tasks/${message.body.id}`).patch({
+					const body: TodoTask = {
 						title: message.body.title,
 						body: {
 							content: message.body.note,
 							contentType: 'text'
 						}
-					});
+					};
+
+					if (message.body.dueDate) {
+						const [ month, day, year ] = message.body.dueDate.split('/');
+
+						body.dueDateTime = {
+							dateTime: `${year}-${month}-${day}T08:00:00.0000000`,
+							timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
+						};
+					}
+
+					// TODO: error handling
+					await client.api(`/me/todo/lists/${message.body.listId}/tasks/${message.body.id}`).patch(body);
 
 					await vscode.commands.executeCommand('microsoft-todo-unoffcial.refreshList');
 					break;
@@ -72,7 +84,8 @@ export class TaskDetailsViewProvider extends WebviewViewBase implements vscode.W
 		const styleResetUri = this._webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'webviews', 'common', 'reset.css'));
 		const styleVSCodeUri = this._webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'webviews', 'common', 'vscode.css'));
 		const styleMainUri = this._webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'webviews', 'taskDetailsView', 'main.css'));
-
+		const tdpCss = this._webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'node_modules', 'tiny-date-picker', 'tiny-date-picker.min.css'));
+		const tdpScript = this._webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'node_modules', 'tiny-date-picker', 'dist', 'tiny-date-picker.min.js'));
 		// Use a nonce to only allow a specific script to be run.
 		const nonce = getNonce();
 
@@ -88,11 +101,13 @@ export class TaskDetailsViewProvider extends WebviewViewBase implements vscode.W
 				<meta name="viewport" content="width=device-width, initial-scale=1.0">
 				<link href="${styleResetUri}" rel="stylesheet">
 				<link href="${styleVSCodeUri}" rel="stylesheet">
+				<Link href="${tdpCss}" rel="stylesheet">
 				<link href="${styleMainUri}" rel="stylesheet">
 				<title>Task details</title>
 			</head>
 			<body>
 				<input placeholder='Add Title' type='text' class='task-title' value=''/>
+				<input placeholder='No due date' type='text' class='task-duedate-input' value=''/>
 				<textarea placeholder='Add Note' class='task-body'></textarea>
 				<button class='update update-task' hidden>Update</button>
 				<button class='update update-cancel' hidden>Cancel</button>
@@ -100,7 +115,7 @@ export class TaskDetailsViewProvider extends WebviewViewBase implements vscode.W
 					<span class="tooltiptext">Edit these properties in the Microsoft To-Do app</span>
 				</h2>
 				<h4 class='task-reminder'></h4>
-				<h4 class='task-duedate'></h4>
+				<script nonce="${nonce}" src="${tdpScript}"></script>
 				<script nonce="${nonce}" src="${scriptUri}"></script>
 			</body>
 			</html>`;

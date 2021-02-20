@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import { MicrosoftToDoClientFactory } from './clientFactories/microsoftToDoClientFactory';
 import { MicrosoftToDoTreeDataProvider } from './todoProviders/microsoftToDoTreeDataProvider';
 import { TaskDetailsViewProvider } from './views/taskDetailsView';
-import { TaskOperations } from './commands/TaskOperations';
+import { TaskOperations } from './commands/taskOperations';
 import { ListOperations } from './commands/listOperations';
 import 'isomorphic-fetch';
 

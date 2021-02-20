@@ -61,3 +61,26 @@ textarea {
 .tooltip:hover .tooltiptext {
     visibility: visible;
 }
+
+.dp-modal,.dp,.dp-cal-header {
+    background-color: var(--vscode-editor-background);
+}
+
+.dp-cal-header, .dp-footer, .dp-cal-footer, .dp-prev, .dp-cal-month, .dp-cal-year, .dp-next, .dp-today, .dp-clear, .dp-close {
+    background-color: var(--vscode-input-background);
+    color: var(--vscode-input-foreground);
+}
+
+.dp-day {
+    color: var(--vscode-input-foreground);
+}
+
+.dp-edge-day {
+    color: var(--vscode-input-placeholderForeground);
+}
+
+.dp-next, .dp-prev {
+    padding: 0;
+    z-index: 100;
+
+}

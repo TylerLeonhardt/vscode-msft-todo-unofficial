@@ -9,8 +9,8 @@
 	const title = document.querySelector('.task-title');
 	/** @type HTMLTextAreaElement */
 	const body = document.querySelector('.task-body');
-	/** @type HTMLButtonElement */
-	const dueDate = document.querySelector('.task-duedate');
+	/** @type HTMLInputElement */
+	const dueDateInput = document.querySelector('.task-duedate-input');
 	/** @type HTMLButtonElement */
 	const remindDate = document.querySelector('.task-reminder');
 	/** @type HTMLButtonElement */
@@ -18,6 +18,9 @@
 	/** @type HTMLButtonElement */
 	const cancelButton = document.querySelector('.update-cancel');
 	let currentNode;
+
+	// @ts-ignore
+	TinyDatePicker(dueDateInput);
 
 	// Handle messages sent from the extension to the webview
 	window.addEventListener('message', event => {
@@ -32,12 +35,6 @@
 		body.value = taskNode.entity.body.content;
 		updateButton.hidden = true;
 		cancelButton.hidden = true;
-		if (taskNode.entity.dueDateTime) {
-			dueDate.hidden = false;
-			dueDate.innerHTML = `Task due at ${new Date(taskNode.entity.dueDateTime.dateTime).toDateString()}`;
-		} else {
-			dueDate.hidden = true;
-		}
 
 		if (taskNode.entity.reminderDateTime) {
 			remindDate.hidden = false;
@@ -61,7 +58,8 @@
 						title: title.value,
 						note: body.value,
 						id: currentNode.entity.id,
-						listId: currentNode.parent.entity.id
+						listId: currentNode.parent.entity.id,
+						dueDate: dueDateInput.value
 					}
 				});
 				currentNode.entity.title = title.value;
@@ -79,6 +77,7 @@
 
 	title.onkeydown = () => onkeydown();
 	body.onkeydown = () => onkeydown();
+	dueDateInput.onchange = () => onkeydown();
 
 	const initialState = vscode.getState();
 	if (initialState) {
