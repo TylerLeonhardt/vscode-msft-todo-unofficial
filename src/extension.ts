@@ -1,12 +1,18 @@
 import * as vscode from 'vscode';
+import { MicrosoftToDoClientFactory } from './clientFactories/microsoftToDoClientFactory';
 import { MicrosoftToDoTreeDataProvider } from './todoProviders/microsoftToDoTreeDataProvider';
-import { TaskCreateView } from './views/taskCreateView';
 import { TaskDetailsViewProvider } from './views/taskDetailsView';
+import { TaskOperations } from './commands/TaskOperations';
+import { ListOperations } from './commands/listOperations';
+import 'isomorphic-fetch';
 
 export async function activate(context: vscode.ExtensionContext) {
+	const clientProvider = new MicrosoftToDoClientFactory();
+	context.subscriptions.push(vscode.window.registerUriHandler(clientProvider));
 
-	const treeDataProvider = new MicrosoftToDoTreeDataProvider();
-	const view = vscode.window.createTreeView('microsoft-todo', {
+	const treeDataProvider = new MicrosoftToDoTreeDataProvider(clientProvider);
+	clientProvider.onDidAuthenticate(() => vscode.commands.executeCommand('microsoft-todo-unoffcial.refreshList'));
+	const view = vscode.window.createTreeView('microsoft-todo-unoffcial.listView', {
 		treeDataProvider,
 		showCollapseAll: true,
 		canSelectMany: true
@@ -14,7 +20,7 @@ export async function activate(context: vscode.ExtensionContext) {
 
 	context.subscriptions.push(view);
 
-	const taskDetailsProvider = new TaskDetailsViewProvider(context.extensionUri);
+	const taskDetailsProvider = new TaskDetailsViewProvider(context.extensionUri, clientProvider);
 	view.onDidChangeSelection(async e => {
 		if (e.selection.length > 0) {
 			const node = e.selection[0];
@@ -28,25 +34,13 @@ export async function activate(context: vscode.ExtensionContext) {
 		taskDetailsProvider.viewType,
 		taskDetailsProvider
 	);
-
 	context.subscriptions.push(detailsView);
-
-	const taskCreateProvider = new TaskCreateView(context.extensionUri);
-
-	context.subscriptions.push(vscode.window.registerWebviewViewProvider(
-		taskCreateProvider.viewType,
-		taskCreateProvider
-	));
-
-	vscode.commands.registerCommand('microsoft-todo.createTask', async () => {
-		await vscode.commands.executeCommand('setContext', 'showTaskCreateView', true);
-		taskCreateProvider.show();
-	});
-
-	vscode.commands.registerCommand('microsoft-todo.cancelCreateTask', async () => {
-		await vscode.commands.executeCommand('setContext', 'showTaskCreateView', false);
-	});
+	
+	const taskOps = new TaskOperations(clientProvider);
+	const listOps = new ListOperations(clientProvider);
+	context.subscriptions.push(taskOps);
+	context.subscriptions.push(listOps);
 }
 
 // this method is called when your extension is deactivated
-export function deactivate() {}
+export function deactivate() { }

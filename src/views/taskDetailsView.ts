@@ -1,44 +1,66 @@
 import * as vscode from 'vscode';
+import { MicrosoftToDoClientFactory } from '../clientFactories/microsoftToDoClientFactory';
 import { TaskNode } from '../todoProviders/microsoftToDoTreeDataProvider';
 import { getNonce, WebviewViewBase } from './WebViewBase';
 
 export class TaskDetailsViewProvider extends WebviewViewBase implements vscode.WebviewViewProvider {
-    public readonly viewType = 'microsoft-todo.taskDetailsView';
+	public readonly viewType = 'microsoft-todo-unoffcial.taskDetailsView';
 
-    private chosenTask: TaskNode | undefined;
+	private chosenTask: TaskNode | undefined;
 
-    constructor(private readonly _extensionUri: vscode.Uri) {
+	constructor(private readonly _extensionUri: vscode.Uri, private readonly clientFactory: MicrosoftToDoClientFactory) {
 		super();
 	}
 
-    public async changeChosenView(node: TaskNode) {
+	public async changeChosenView(node: TaskNode) {
 		this.chosenTask = node;
-		vscode.commands.executeCommand('setContext', 'showTaskDetailsView', true);
+		await vscode.commands.executeCommand('setContext', 'showTaskDetailsView', true);
 		this.show(true);
-        await this._postMessage(node);
+		await this._postMessage(node);
 	}
 
-    async resolveWebviewView(webviewView: vscode.WebviewView, context: vscode.WebviewViewResolveContext<unknown>, token: vscode.CancellationToken): Promise<void> {
-        this._view = webviewView;
+	async resolveWebviewView(webviewView: vscode.WebviewView, context: vscode.WebviewViewResolveContext<unknown>, token: vscode.CancellationToken): Promise<void> {
+		this._view = webviewView;
 		this._webview = webviewView.webview;
 		this._webview.options = {
 			// Allow scripts in the webview
 			enableScripts: true,
-			
+
 			localResourceRoots: [
 				this._extensionUri
 			],
 		};
 		super.initialize();
 
-        this._webview.html = this.getHtmlForWebview();
+		this._webview.html = this.getHtmlForWebview();
 
-        // if (this.chosenTask) {
-        //     await this.changeChosenView(this.chosenTask);
-        // }
-    }
+		this._disposables.push(webviewView.webview.onDidReceiveMessage(async (message) => {
+			switch (message.command) {
+				case 'cancel':
+					await vscode.commands.executeCommand('microsoft-todo-unoffcial.closeCreateTask');
+					break;
+				case 'update':
+					const client = await this.clientFactory.getClient();
+					if (!client) {
+						return await vscode.window.showErrorMessage("you're not logged in.");
+					}
 
-    private getHtmlForWebview() {
+					// TODO: error handling
+					await client.api(`/me/todo/lists/${message.body.listId}/tasks/${message.body.id}`).patch({
+						title: message.body.title,
+						body: {
+							content: message.body.note,
+							contentType: 'text'
+						}
+					});
+
+					await vscode.commands.executeCommand('microsoft-todo-unoffcial.refreshList');
+					break;
+			}
+		}));
+	}
+
+	private getHtmlForWebview() {
 		if (!this._webview) {
 			throw new Error('bad state: no webview found');
 		}
@@ -53,17 +75,6 @@ export class TaskDetailsViewProvider extends WebviewViewBase implements vscode.W
 
 		// Use a nonce to only allow a specific script to be run.
 		const nonce = getNonce();
-
-		let content: string;
-		if (!this.chosenTask) {
-			content = `
-			<h2 class="task-title"></h2>
-			<p class="task-body">Select a task to see additional details.</p>`;
-		} else {
-			content = `
-			<h2 class="task-title">${this.chosenTask?.entity.title || ""}</h2>
-			<p class="task-body">${this.chosenTask?.entity.body?.content || ""}</p>`;
-		}
 
 		return `<!DOCTYPE html>
 			<html lang="en">
@@ -81,7 +92,15 @@ export class TaskDetailsViewProvider extends WebviewViewBase implements vscode.W
 				<title>Task details</title>
 			</head>
 			<body>
-				${content}
+				<input placeholder='Add Title' type='text' class='task-title' value=''/>
+				<textarea placeholder='Add Note' class='task-body'></textarea>
+				<button class='update update-task' hidden>Update</button>
+				<button class='update update-cancel' hidden>Cancel</button>
+				<h2 class='tooltip'>Additional details:
+					<span class="tooltiptext">Edit these properties in the Microsoft To-Do app</span>
+				</h2>
+				<h4 class='task-reminder'></h4>
+				<h4 class='task-duedate'></h4>
 				<script nonce="${nonce}" src="${scriptUri}"></script>
 			</body>
 			</html>`;

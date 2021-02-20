@@ -3,94 +3,87 @@
 // This script will be run within the webview itself
 // It cannot access the main VS Code APIs directly.
 (function () {
-    //@ts-ignore
-    const vscode = acquireVsCodeApi();
+	//@ts-ignore
+	const vscode = acquireVsCodeApi();
+	/** @type HTMLInputElement */
+	const title = document.querySelector('.task-title');
+	/** @type HTMLTextAreaElement */
+	const body = document.querySelector('.task-body');
+	/** @type HTMLButtonElement */
+	const dueDate = document.querySelector('.task-duedate');
+	/** @type HTMLButtonElement */
+	const remindDate = document.querySelector('.task-reminder');
+	/** @type HTMLButtonElement */
+	const updateButton = document.querySelector('.update-task');
+	/** @type HTMLButtonElement */
+	const cancelButton = document.querySelector('.update-cancel');
+	let currentNode;
 
-    // const taskNode = vscode.getState();
+	// Handle messages sent from the extension to the webview
+	window.addEventListener('message', event => {
+		const taskNode = event.data; // The json data that the extension sent
+		changeTaskNode(taskNode);
+	});
 
-    // if (taskNode) {
-    //     changeTaskNode(taskNode);
-    // }
+	function changeTaskNode(taskNode) {
+		vscode.setState(taskNode);
+		currentNode = taskNode;
+		title.value = taskNode.entity.title;
+		body.value = taskNode.entity.body.content;
+		updateButton.hidden = true;
+		cancelButton.hidden = true;
+		if (taskNode.entity.dueDateTime) {
+			dueDate.hidden = false;
+			dueDate.innerHTML = `Task due at ${new Date(taskNode.entity.dueDateTime.dateTime).toDateString()}`;
+		} else {
+			dueDate.hidden = true;
+		}
 
-    // /** @type {Array<{ value: string }>} */
-    // let colors = oldState.colors;
+		if (taskNode.entity.reminderDateTime) {
+			remindDate.hidden = false;
+			remindDate.innerHTML = `Reminder set at ${new Date(taskNode.entity.reminderDateTime.dateTime).toLocaleString()}`;
+		} else {
+			remindDate.hidden = true;
+		}
+	}
 
-    // updateColorList(colors);
+	const onkeydown = () => {
+		// TODO: only do this if the content had changed
+		if (updateButton.hidden) {
+			updateButton.hidden = false;
+			cancelButton.hidden = false;
+			updateButton.onclick = () => {
+				updateButton.hidden = true;
+				cancelButton.hidden = true;
+				vscode.postMessage({
+					command: 'update',
+					body: {
+						title: title.value,
+						note: body.value,
+						id: currentNode.entity.id,
+						listId: currentNode.parent.entity.id
+					}
+				});
+				currentNode.entity.title = title.value;
+				currentNode.entity.body.content = body.value;
+			};
 
-    // Handle messages sent from the extension to the webview
-    window.addEventListener('message', event => {
-        const taskNode = event.data; // The json data that the extension sent
-        changeTaskNode(taskNode);
-    });
+			cancelButton.onclick = () => {
+				updateButton.hidden = true;
+				cancelButton.hidden = true;
+				title.value = currentNode.entity.title;
+				body.value = currentNode.entity.body.content;
+			};
+		}
+	};
 
-    function changeTaskNode(taskNode) {
-        const title = document.querySelector('.task-title');
-        title.innerHTML = taskNode.entity.title;
-        const body = document.querySelector('.task-body');
-        body.innerHTML = taskNode.entity.body.content;
-        // vscode.setState(taskNode);
-    }
+	title.onkeydown = () => onkeydown();
+	body.onkeydown = () => onkeydown();
 
-    vscode.postMessage({ command: 'ready' });
+	const initialState = vscode.getState();
+	if (initialState) {
+		changeTaskNode(initialState);
+	}
 
-    /**
-     * @param {Array<{ value: string }>} colors
-     */
-    // function updateColorList(colors) {
-    //     const ul = document.querySelector('.color-list');
-    //     ul.textContent = '';
-    //     for (const color of colors) {
-    //         const li = document.createElement('li');
-    //         li.className = 'color-entry';
-
-    //         const colorPreview = document.createElement('div');
-    //         colorPreview.className = 'color-preview';
-    //         colorPreview.style.backgroundColor = `#${color.value}`;
-    //         colorPreview.addEventListener('click', () => {
-    //             onColorClicked(color.value);
-    //         });
-    //         li.appendChild(colorPreview);
-
-    //         const input = document.createElement('input');
-    //         input.className = 'color-input';
-    //         input.type = 'text';
-    //         input.value = color.value;
-    //         input.addEventListener('change', (e) => {
-    //             const value = e.target.value;
-    //             if (!value) {
-    //                 // Treat empty value as delete
-    //                 colors.splice(colors.indexOf(color), 1);
-    //             } else {
-    //                 color.value = value;
-    //             }
-    //             updateColorList(colors);
-    //         });
-    //         li.appendChild(input);
-
-    //         ul.appendChild(li);
-    //     }
-
-    //     // Update the saved state
-    //     vscode.setState({ colors: colors });
-    // }
-
-    // /** 
-    //  * @param {string} color 
-    //  */
-    // function onColorClicked(color) {
-    //     vscode.postMessage({ type: 'colorSelected', value: color });
-    // }
-
-    // /**
-    //  * @returns string
-    //  */
-    // function getNewCalicoColor() {
-    //     const colors = ['020202', 'f1eeee', 'a85b20', 'daab70', 'efcb99'];
-    //     return colors[Math.floor(Math.random() * colors.length)];
-    // }
-
-    // function addColor() {
-    //     colors.push({ value: getNewCalicoColor() });
-    //     updateColorList(colors);
-    // }
+	vscode.postMessage({ command: 'ready' });
 }());

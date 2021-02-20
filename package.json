@@ -1,6 +1,6 @@
 {
-	"name": "msft-todo",
-	"displayName": "Microsoft To-Do",
+	"name": "msft-todo-unofficial",
+	"displayName": "Microsoft To-Do (Unofficial)",
 	"publisher": "tylerleonhardt",
 	"description": "",
 	"version": "0.0.1",
@@ -11,26 +11,25 @@
 		"Other"
 	],
 	"activationEvents": [
-		"onStartupFinished",
-		"onUri"
+		"onView:microsoft-todo-unoffcial.listView"
 	],
 	"main": "./out/extension.js",
 	"contributes": {
 		"commands": [
 			{
-				"command": "microsoft-todo.login",
+				"command": "microsoft-todo-unoffcial.login",
 				"title": "Login to Microsoft To-Do"
 			},
 			{
-				"command": "microsoft-todo.refreshList",
-				"title": "Refresh list",
+				"command": "microsoft-todo-unoffcial.refreshList",
+				"title": "Refresh",
 				"icon": {
 					"dark": "./resources/dark/refresh.svg",
 					"light": "./resources/light/refresh.svg"
 				}
 			},
 			{
-				"command": "microsoft-todo.complete",
+				"command": "microsoft-todo-unoffcial.complete",
 				"title": "Complete task",
 				"icon": {
 					"dark": "./resources/dark/check.svg",
@@ -38,87 +37,150 @@
 				}
 			},
 			{
-				"command": "microsoft-todo.uncomplete",
-				"title": "Complete task",
+				"command": "microsoft-todo-unoffcial.uncomplete",
+				"title": "Uncomplete task",
 				"icon": {
 					"dark": "./resources/dark/check.svg",
 					"light": "./resources/light/check.svg"
 				}
 			},
 			{
-				"command": "microsoft-todo.createTask",
+				"command": "microsoft-todo-unoffcial.createTask",
 				"title": "Create a task",
 				"icon": {
-					"dark": "./resources/dark/check.svg",
-					"light": "./resources/light/check.svg"
+					"dark": "./resources/dark/add.svg",
+					"light": "./resources/light/add.svg"
 				}
 			},
 			{
-				"command": "microsoft-todo.cancelCreateTask",
-				"title": "Cancel"
+				"command": "microsoft-todo-unoffcial.deleteTask",
+				"title": "Delete task",
+				"icon": {
+					"dark": "./resources/dark/trash.svg",
+					"light": "./resources/light/trash.svg"
+				}
+			},
+			{
+				"command": "microsoft-todo-unoffcial.createList",
+				"title": "Create a list",
+				"icon": {
+					"dark": "./resources/dark/add.svg",
+					"light": "./resources/light/add.svg"
+				}
+			},
+			{
+				"command": "microsoft-todo-unoffcial.deleteList",
+				"title": "Delete list",
+				"icon": {
+					"dark": "./resources/dark/trash.svg",
+					"light": "./resources/light/trash.svg"
+				}
+			},
+			{
+				"command": "microsoft-todo-unoffcial.openList",
+				"title": "Open list"
+			},
+			{
+				"command": "microsoft-todo-unofficial.toggleTask",
+				"title": "Toggle task"
+			}
+		],
+		"keybindings": [
+			{
+				"command": "microsoft-todo-unofficial.toggleTask",
+				"key": "space",
+				"when": "editorTextFocus && resourceScheme == microsoft-todo-unofficial"
 			}
 		],
 		"viewsContainers": {
 			"activitybar": [
 				{
-					"id": "todo",
-					"title": "To-Do",
+					"id": "microsoft-todo-unoffcial",
+					"title": "Microsoft To-Do (Unofficial)",
 					"icon": "./resources/dark/checklist.svg"
 				}
 			]
 		},
 		"views": {
-			"todo": [
+			"microsoft-todo-unoffcial": [
 				{
-					"id": "microsoft-todo.taskCreateView",
-					"name": "Create task",
-					"type": "webview",
-					"visibility": "hidden",
-					"when": "showTaskCreateView"
-				},
-				{
-					"id": "microsoft-todo",
+					"id": "microsoft-todo-unoffcial.listView",
 					"name": "Microsoft To-Do",
 					"type": "tree",
 					"visibility": "visible"
 				},
 				{
-					"id": "microsoft-todo.taskDetailsView",
+					"id": "microsoft-todo-unoffcial.taskDetailsView",
 					"name": "Task details",
 					"type": "webview",
 					"visibility": "hidden",
-					"when": "showTaskDetailsView"
+					"when": "showTaskDetailsView",
+					"contextualTitle": "To-Do Task details"
 				}
-				
 			]
 		},
 		"viewsWelcome": [
 			{
-				"view": "microsoft-todo",
-				"contents": "Login to see your Microsoft To-Do lists.\n[Login](command:microsoft-todo.login)"
+				"view": "microsoft-todo-unoffcial.listView",
+				"contents": "Login to see your Microsoft To-Do lists.\n[Login](command:microsoft-todo-unoffcial.login)"
 			}
 		],
 		"menus": {
 			"view/item/context": [
 				{
-					"command": "microsoft-todo.refreshList",
+					"command": "microsoft-todo-unoffcial.refreshList",
 					"when": "viewItem == list",
+					"group": "inline@200"
+				},
+				{
+					"command": "microsoft-todo-unoffcial.createTask",
+					"when": "viewItem == list",
+					"group": "inline@100"
+				},
+				{
+					"command": "microsoft-todo-unoffcial.complete",
+					"when": "viewItem == task-notcompleted",
 					"group": "inline"
 				},
 				{
-					"command": "microsoft-todo.complete",
-					"when": "viewItem == task",
+					"command": "microsoft-todo-unoffcial.uncomplete",
+					"when": "viewItem == task-completed",
 					"group": "inline"
+				},
+				{
+					"command": "microsoft-todo-unoffcial.complete",
+					"when": "viewItem == task-notcompleted",
+					"group": "z_commands@100"
+				},
+				{
+					"command": "microsoft-todo-unoffcial.uncomplete",
+					"when": "viewItem == task-completed",
+					"group": "z_commands@100"
+				},
+				{
+					"command": "microsoft-todo-unoffcial.deleteTask",
+					"when": "viewItem == task-completed || viewItem == task-notcompleted",
+					"group": "z_commands@200"
+				},
+				{
+					"command": "microsoft-todo-unoffcial.deleteList",
+					"when": "viewItem == list",
+					"group": "z_commands@200"
+				},
+				{
+					"command": "microsoft-todo-unoffcial.openList",
+					"when": "viewItem == list",
+					"group": "z_commands@100"
 				}
 			],
 			"view/title": [
 				{
-					"command": "microsoft-todo.refreshList",
-					"group": "inline"
+					"command": "microsoft-todo-unoffcial.refreshList",
+					"group": "navigation"
 				},
 				{
-					"command": "microsoft-todo.createTask",
-					"group": "inline"
+					"command": "microsoft-todo-unoffcial.createTask",
+					"group": "navigation"
 				}
 			]
 		}
@@ -148,7 +210,6 @@
 	},
 	"dependencies": {
 		"@microsoft/microsoft-graph-client": "^2.2.1",
-		"axios": "^0.21.1",
 		"isomorphic-fetch":"^3.0.0"
 	}
 }

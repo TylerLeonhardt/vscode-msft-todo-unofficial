@@ -1,13 +1,8 @@
 import * as vscode from 'vscode';
-import 'isomorphic-fetch';
-import { Client } from "@microsoft/microsoft-graph-client";
-import { Entity, TodoTask, TodoTaskList } from '@microsoft/microsoft-graph-types';
+import { TodoTask, TodoTaskList } from '@microsoft/microsoft-graph-types';
+import { MicrosoftToDoClientFactory } from '../clientFactories/microsoftToDoClientFactory';
 
-const redirectUri = encodeURIComponent(`${vscode.env.uriScheme}://tylerleonhardt.msft-todo/`);
-const scopes = ['Tasks.ReadWrite'];
-const uri = vscode.Uri.parse(`https://login.microsoftonline.com/common/oauth2/v2.0/authorize?client_id=a4fd7674-4ebd-4dbc-831c-338314dd459e&response_type=token&redirect_uri=${redirectUri}&response_mode=fragment&scope=${scopes}`);
-
-interface ListNode {
+export interface ListNode {
 	nodeType: 'list';
 	entity: TodoTaskList;
 }
@@ -15,6 +10,10 @@ interface ListNode {
 enum TaskStatusType {
 	completed = 'Completed',
 	inProgress = 'In Progress'
+}
+
+interface CreateListNode {
+	nodeType: 'create-list';
 }
 
 interface StatusNode {
@@ -29,93 +28,54 @@ export interface TaskNode {
 	parent: ListNode;
 }
 
-interface LogInNode {
-	nodeType: 'login';
-}
-
-type ToDoEntity = TaskNode | StatusNode | ListNode | LogInNode;
+type ToDoEntity = TaskNode | StatusNode | ListNode | CreateListNode;
 
 export class MicrosoftToDoTreeDataProvider extends vscode.Disposable implements vscode.TreeDataProvider<ToDoEntity> {
 	private didChangeTreeData = new vscode.EventEmitter<void | ToDoEntity | undefined>();
 	onDidChangeTreeData?: vscode.Event<void | ToDoEntity | undefined> = this.didChangeTreeData.event;
 
-	private readonly loginCommand: vscode.Disposable;
 	private readonly refreshCommand: vscode.Disposable;
-	private readonly uriHandler: vscode.Disposable;
 
-	private _token: string | null = null;
-	private async getClient(): Promise<Client | undefined> {
-		// const session = await vscode.authentication.getSession('microsoft', scopes, { createIfNone: true });
-
-		if (!this._token) {
-			// await vscode.env.openExternal(uri);
-			return;
-		}
-
-		return Client.init({
-			authProvider: (done) => {
-				// done(undefined, session.accessToken);
-				done(undefined, this._token);
-			}
-		});
-	}
-
-	constructor() {
+	constructor(private clientFactory: MicrosoftToDoClientFactory) {
 		super(() => this.dispose());
 
-		this.uriHandler = vscode.window.registerUriHandler({
-			handleUri: (uri) => {
-				const fragmentResult = new Map<string, string>();
-				uri.fragment.split('&').forEach(q => {
-					const [key, value] = q.split('=');
-					fragmentResult.set(key, value);
-				});
-
-				if (fragmentResult.has('access_token')) {
-					this._token = fragmentResult.get('access_token')!;
-					this.didChangeTreeData.fire();
-					return;
-				}
-
-				console.log(uri.query);
-			}
-		});
-
-		this.loginCommand = vscode.commands.registerCommand(
-			'microsoft-todo.login',
-			() => vscode.env.openExternal(uri));
-
 		this.refreshCommand = vscode.commands.registerCommand(
-			'microsoft-todo.refreshList',
+			'microsoft-todo-unoffcial.refreshList',
 			(element?: ToDoEntity) => this.didChangeTreeData.fire(element));
 
 		this.refreshCommand = vscode.commands.registerCommand(
-			'microsoft-todo.complete',
-			(element: TaskNode) => this.changeState(element));
+			'microsoft-todo-unoffcial.complete',
+			(node: TaskNode, nodes: TaskNode[] | undefined) => nodes ? this.changeState(nodes) : this.changeState([node]));
 
 		this.refreshCommand = vscode.commands.registerCommand(
-			'microsoft-todo.uncomplete',
-			(element: TaskNode) => this.changeState(element));
+			'microsoft-todo-unoffcial.uncomplete',
+			(node: TaskNode, nodes: TaskNode[] | undefined) => nodes ? this.changeState(nodes) : this.changeState([node]));
 	}
 
-	async changeState(element: TaskNode) {
-		const client = await this.getClient();
+	async changeState(nodes: TaskNode[]) {
+		const client = await this.clientFactory.getClient();
 
-		await client!.api(`/me/todo/lists/${element.parent.entity.id}/tasks/${element.entity.id}`).patch({
-			status: element.entity.status === 'completed' ? 'notStarted' : 'completed'
+		const a = await client!.api(`/me/todo/lists/${nodes[0].parent.entity.id}/tasks/${nodes[0].entity.id}`).get();
+		console.log(a);
+		const promises = nodes.map(async n => {
+			await client!.api(`/me/todo/lists/${n.parent.entity.id}/tasks/${n.entity.id}`).patch({
+				status: n.entity.status === 'completed' ? 'notStarted' : 'completed'
+			});
+			this.didChangeTreeData.fire(n.parent);
 		});
 
-		this.didChangeTreeData.fire(element.parent);
+		// TODO: Error handling
+		await Promise.all(promises);
 	}
 
 	getTreeItem(element: ToDoEntity): vscode.TreeItem | Thenable<vscode.TreeItem> {
 		let treeItem: vscode.TreeItem;
 		switch (element.nodeType) {
-			case 'login':
-				treeItem = new vscode.TreeItem('Log in to see your Microsoft To-Do lists');
+			case 'create-list':
+				treeItem = new vscode.TreeItem('Create a new list...');
 				treeItem.command = {
-					command: 'microsoft-todo.login',
-					title: 'Click to login to Microsoft To-Do',
+					command: 'microsoft-todo-unoffcial.createList',
+					title: 'Create a new list...'
 				};
 				break;
 			case 'list':
@@ -123,52 +83,63 @@ export class MicrosoftToDoTreeDataProvider extends vscode.Disposable implements 
 				treeItem.contextValue = element.nodeType;
 				break;
 			case 'task':
-				treeItem = new vscode.TreeItem(element.entity.title || "", vscode.TreeItemCollapsibleState.None);
+				let label = element.entity.title || "";
+				const dueDateTime = element.entity.dueDateTime;
+				const highlights: [number, number][] = [];
+
+				if (dueDateTime?.dateTime) {
+					const dueStr = " DUE " + new Date(dueDateTime.dateTime).toLocaleDateString() + " ";
+					label += "  ";
+					highlights.push([label.length, label.length + dueStr.length]);
+					label += dueStr;
+				}
+
+				const treeItemLabel: vscode.TreeItemLabel = {
+					label,
+					highlights
+				};
+
+				treeItem = new vscode.TreeItem(treeItemLabel, vscode.TreeItemCollapsibleState.None);
+				const status = element.entity.status === 'completed' ? 'completed' : 'notcompleted';
+				treeItem.contextValue = `${element.nodeType}-${status}`;
 				break;
 			case 'status':
 				const collapse = element.statusType === TaskStatusType.completed
 					? vscode.TreeItemCollapsibleState.Collapsed
 					: vscode.TreeItemCollapsibleState.Expanded;
 
-				treeItem = new vscode.TreeItem(element.statusType, collapse);
+				const statusLabel = ` ${element.statusType} `;
+				treeItem = new vscode.TreeItem({
+					highlights: [[0, statusLabel.length]],
+					label: statusLabel
+				}, collapse);
+
+				treeItem.label = undefined;
 				break;
 		}
 
-		treeItem.contextValue = element.nodeType;
 		return treeItem;
 	}
 
 	async getChildren(element?: ToDoEntity): Promise<ToDoEntity[] | undefined> {
-		const client = await this.getClient();
+		const client = await this.clientFactory.getClient();
 		if (!client) {
-			return; // [{ nodeType: 'login' }];
+			return;
 		}
 
 		if (!element) {
-			const taskLists = new Array<TodoTaskList>();
+			const taskLists: TodoTask[] = await this.clientFactory.getAll(client, '/me/todo/lists');
 
-			let iterUri: string | null | undefined = '/me/todo/lists';
-			while (iterUri) {
-				let res = await client.api(iterUri).get() as { '@odata.nextLink': string | null | undefined; value: TodoTaskList[] };
-				res.value.forEach(r => taskLists.push(r));
-				iterUri = res['@odata.nextLink'];
-			}
-
-			return taskLists.map(entity => ({ nodeType: 'list', entity }));
+			const nodes: ToDoEntity[] = taskLists.map(entity => ({ nodeType: 'list', entity }));
+			nodes.push({ nodeType: 'create-list' });
+			return nodes;
 		}
 
 		if (element.nodeType === 'list') {
 
 			const getTasks = async (getCompleted: boolean): Promise<TaskNode[]> => {
-				const tasks = new Array<TodoTask>();
-
 				const comparison = getCompleted ? 'eq' : 'ne';
-				let iterUri: string | null | undefined = `/me/todo/lists/${(element.entity as TodoTaskList).id}/tasks?$filter= status ${comparison} 'completed'`;
-				while (iterUri) {
-					let res = await client.api(iterUri).get() as { '@odata.nextLink': string | null | undefined; value: TodoTask[] };
-					res.value.forEach(r => tasks.push(r));
-					iterUri = res['@odata.nextLink'];
-				}
+				const tasks: TodoTask[] = await this.clientFactory.getAll(client, `/me/todo/lists/${(element.entity as TodoTaskList).id}/tasks?$filter= status ${comparison} 'completed'`);
 
 				return tasks.map(entity => ({
 					nodeType: 'task',
@@ -197,7 +168,6 @@ export class MicrosoftToDoTreeDataProvider extends vscode.Disposable implements 
 	}
 
 	public dispose() {
-		this.uriHandler.dispose();
-		this.loginCommand.dispose();
+		this.refreshCommand.dispose();
 	}
 }

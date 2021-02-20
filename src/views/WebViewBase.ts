@@ -36,7 +36,7 @@ export class WebviewBase {
 	// eslint-disable-next-line @typescript-eslint/naming-convention
 	protected readonly MESSAGE_UNHANDLED: string = 'message not handled';
 
-	constructor () {
+	constructor() {
 		this._waitForReady = new Promise(resolve => {
 			const disposable = this._onIsReady.event(() => {
 				disposable.dispose();
