@@ -107,13 +107,14 @@ export class TaskDetailsViewProvider extends WebviewViewBase implements vscode.W
 			</head>
 			<body>
 				<input placeholder='Add Title' type='text' class='task-title' value=''/>
-				<input placeholder='No due date' type='text' class='task-duedate-input' value=''/>
+				<input placeholder='Add Due Date' type='text' class='task-duedate' value=''/>
+				<label for="task-body">Note</label>
 				<textarea placeholder='Add Note' class='task-body'></textarea>
 				<button class='update update-task' hidden>Update</button>
 				<button class='update update-cancel' hidden>Cancel</button>
-				<h2 class='tooltip'>Additional details:
+				<h3 class='tooltip'>Additional details:
 					<span class="tooltiptext">Edit these properties in the Microsoft To-Do app</span>
-				</h2>
+				</h3>
 				<h4 class='task-reminder'></h4>
 				<script nonce="${nonce}" src="${tdpScript}"></script>
 				<script nonce="${nonce}" src="${scriptUri}"></script>

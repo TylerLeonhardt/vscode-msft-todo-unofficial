@@ -62,7 +62,12 @@ textarea {
     visibility: visible;
 }
 
-.dp-modal,.dp,.dp-cal-header {
+.dp-modal {
+    margin: 0;
+    background-color: var(--vscode-input-placeholderForeground);
+}
+
+.dp {
     background-color: var(--vscode-editor-background);
 }
 
