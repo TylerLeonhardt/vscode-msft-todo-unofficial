@@ -74,13 +74,9 @@
 		cancelButton.hidden = true;
 
 		dueDateInput.value = taskNode.entity.dueDateTime ? formatDueDate(taskNode.entity.dueDateTime.dateTime) : '';
-
-		if (taskNode.entity.reminderDateTime) {
-			remindDate.hidden = false;
-			remindDate.innerHTML = `Reminder set at ${new Date(taskNode.entity.reminderDateTime.dateTime).toLocaleString()}`;
-		} else {
-			remindDate.hidden = true;
-		}
+		remindDate.innerHTML = taskNode.entity.reminderDateTime
+			? `Reminder set at ${new Date(taskNode.entity.reminderDateTime.dateTime).toLocaleString()}`
+			: 'No reminder set';
 	}
 
 	const onkeydown = () => {

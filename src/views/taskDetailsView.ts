@@ -115,7 +115,7 @@ export class TaskDetailsViewProvider extends WebviewViewBase implements vscode.W
 				<h3 class='tooltip'>Additional details:
 					<span class="tooltiptext">Edit these properties in the Microsoft To-Do app</span>
 				</h3>
-				<h4 class='task-reminder'></h4>
+				<h4 class='task-reminder'>No reminder set</h4>
 				<script nonce="${nonce}" src="${tdpScript}"></script>
 				<script nonce="${nonce}" src="${scriptUri}"></script>
 			</body>

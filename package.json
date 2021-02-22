@@ -45,6 +45,22 @@
 				}
 			},
 			{
+				"command": "microsoft-todo-unoffcial.star",
+				"title": "Star task",
+				"icon": {
+					"dark": "./resources/dark/star-empty.svg",
+					"light": "./resources/light/star-empty.svg"
+				}
+			},
+			{
+				"command": "microsoft-todo-unoffcial.unstar",
+				"title": "Unstar task",
+				"icon": {
+					"dark": "./resources/dark/star-full.svg",
+					"light": "./resources/light/star-full.svg"
+				}
+			},
+			{
 				"command": "microsoft-todo-unoffcial.createTask",
 				"title": "Create a task",
 				"icon": {
@@ -139,28 +155,48 @@
 				},
 				{
 					"command": "microsoft-todo-unoffcial.complete",
-					"when": "viewItem == task-notcompleted",
+					"when": "viewItem =~ /task-notcompleted/",
 					"group": "inline"
 				},
 				{
 					"command": "microsoft-todo-unoffcial.uncomplete",
-					"when": "viewItem == task-completed",
+					"when": "viewItem =~ /task-completed/",
 					"group": "inline"
 				},
 				{
 					"command": "microsoft-todo-unoffcial.complete",
-					"when": "viewItem == task-notcompleted",
+					"when": "viewItem =~ /task-notcompleted/",
 					"group": "z_commands@100"
 				},
 				{
 					"command": "microsoft-todo-unoffcial.uncomplete",
-					"when": "viewItem == task-completed",
+					"when": "viewItem =~ /task-completed/",
 					"group": "z_commands@100"
 				},
 				{
-					"command": "microsoft-todo-unoffcial.deleteTask",
-					"when": "viewItem == task-completed || viewItem == task-notcompleted",
+					"command": "microsoft-todo-unoffcial.star",
+					"when": "viewItem =~ /task-notstarred/",
+					"group": "inline"
+				},
+				{
+					"command": "microsoft-todo-unoffcial.unstar",
+					"when": "viewItem =~ /task-starred/",
+					"group": "inline"
+				},
+				{
+					"command": "microsoft-todo-unoffcial.star",
+					"when": "viewItem =~ /task-notstarred/",
 					"group": "z_commands@200"
+				},
+				{
+					"command": "microsoft-todo-unoffcial.unstar",
+					"when": "viewItem =~ /task-starred/",
+					"group": "z_commands@200"
+				},
+				{
+					"command": "microsoft-todo-unoffcial.deleteTask",
+					"when": "viewItem =~ /task/",
+					"group": "z_commands@300"
 				},
 				{
 					"command": "microsoft-todo-unoffcial.deleteList",

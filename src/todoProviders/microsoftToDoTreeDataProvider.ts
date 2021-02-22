@@ -45,21 +45,41 @@ export class MicrosoftToDoTreeDataProvider extends vscode.Disposable implements 
 
 		this.refreshCommand = vscode.commands.registerCommand(
 			'microsoft-todo-unoffcial.complete',
-			(node: TaskNode, nodes: TaskNode[] | undefined) => nodes ? this.changeState(nodes) : this.changeState([node]));
+			(node: TaskNode, nodes: TaskNode[] | undefined) => nodes ? this.changeCompletedState(nodes) : this.changeCompletedState([node]));
 
 		this.refreshCommand = vscode.commands.registerCommand(
 			'microsoft-todo-unoffcial.uncomplete',
-			(node: TaskNode, nodes: TaskNode[] | undefined) => nodes ? this.changeState(nodes) : this.changeState([node]));
+			(node: TaskNode, nodes: TaskNode[] | undefined) => nodes ? this.changeCompletedState(nodes) : this.changeCompletedState([node]));
+
+		this.refreshCommand = vscode.commands.registerCommand(
+			'microsoft-todo-unoffcial.star',
+			(node: TaskNode, nodes: TaskNode[] | undefined) => nodes ? this.changeImportanceState(nodes) : this.changeImportanceState([node]));
+
+		this.refreshCommand = vscode.commands.registerCommand(
+			'microsoft-todo-unoffcial.unstar',
+			(node: TaskNode, nodes: TaskNode[] | undefined) => nodes ? this.changeImportanceState(nodes) : this.changeImportanceState([node]));
 	}
 
-	async changeState(nodes: TaskNode[]) {
+	async changeCompletedState(nodes: TaskNode[]) {
 		const client = await this.clientFactory.getClient();
 
-		const a = await client!.api(`/me/todo/lists/${nodes[0].parent.entity.id}/tasks/${nodes[0].entity.id}`).get();
-		console.log(a);
 		const promises = nodes.map(async n => {
 			await client!.api(`/me/todo/lists/${n.parent.entity.id}/tasks/${n.entity.id}`).patch({
 				status: n.entity.status === 'completed' ? 'notStarted' : 'completed'
+			});
+			this.didChangeTreeData.fire(n.parent);
+		});
+
+		// TODO: Error handling
+		await Promise.all(promises);
+	}
+
+	async changeImportanceState(nodes: TaskNode[]) {
+		const client = await this.clientFactory.getClient();
+
+		const promises = nodes.map(async n => {
+			await client!.api(`/me/todo/lists/${n.parent.entity.id}/tasks/${n.entity.id}`).patch({
+				importance: n.entity.importance === 'high' ? 'normal' : 'high'
 			});
 			this.didChangeTreeData.fire(n.parent);
 		});
@@ -106,7 +126,8 @@ export class MicrosoftToDoTreeDataProvider extends vscode.Disposable implements 
 
 				treeItem = new vscode.TreeItem(treeItemLabel, vscode.TreeItemCollapsibleState.None);
 				const status = element.entity.status === 'completed' ? 'completed' : 'notcompleted';
-				treeItem.contextValue = `${element.nodeType}-${status}`;
+				const importance = element.entity.importance === 'high' ? 'starred' : 'notstarred';
+				treeItem.contextValue = `${element.nodeType}-${status} ${element.nodeType}-${importance}`;
 				treeItem.tooltip = new vscode.MarkdownString(tooltip, true);
 				break;
 			case 'status':
