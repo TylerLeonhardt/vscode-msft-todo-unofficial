@@ -11,24 +11,30 @@
 	const body = document.querySelector('.task-body');
 	/** @type HTMLInputElement */
 	const dueDateInput = document.querySelector('.task-duedate');
-	/** @type HTMLButtonElement */
-	const remindDate = document.querySelector('.task-reminder');
+	/** @type HTMLInputElement */
+	const reminderDate = document.querySelector('.task-reminder-date');
+	/** @type HTMLInputElement */
+	const reminderTime = document.querySelector('.task-reminder-time');
 	/** @type HTMLButtonElement */
 	const updateButton = document.querySelector('.update-task');
 	/** @type HTMLButtonElement */
 	const cancelButton = document.querySelector('.update-cancel');
+
 	let currentNode;
 
 	/**
-	 * @param { Date | string } date
-	 * @returns { string }
+	 * @param {string} prefix
+	 * @param {string} formatStr
+	 * @param {{dateTime: string;timeZone: string;}} graphDateTime
 	 */
-	function formatDueDate(date) {
-		if (typeof date === 'string' || date instanceof String) {
-			date = new Date(date);
-		}
-		return `Due ${date.toLocaleDateString()}`;
+	function format(prefix, formatStr, graphDateTime) {
+		const mo = graphDateTime.timeZone === 'UTC' ? moment.utc(graphDateTime.dateTime) : moment.tz(graphDateTime.dateTime, graphDateTime.timeZone);
+		return mo.local().format(`[${prefix}]${formatStr}`);
 	}
+
+	const formatTime = (graphDateTime) => format('', 'HH:mm', graphDateTime);
+	const formatDueDate = (graphDateTime) => format('Due ', 'l', graphDateTime);
+	const formatReminderDate = (graphDateTime) => format('Remind at ', 'l', graphDateTime);
 
 	// @ts-ignore
 	TinyDatePicker(dueDateInput, {
@@ -37,7 +43,7 @@
 		 * @returns { string }
 		 */
 		format(date) {
-			return formatDueDate(date);
+			return moment(date).local().format('[Due] l');
 		},
 
 		/**
@@ -53,9 +59,34 @@
 				str = str.split('Due ')[1];
 			}
 
-			const [ month, day, year ] = str.split('/');
-			var date = new Date(parseInt(year, 10), parseInt(month, 10) - 1, parseInt(day, 10));
-			return date || new Date();
+			return moment(str).toDate();
+		}
+	});
+
+	// @ts-ignore
+	TinyDatePicker(reminderDate, {
+		/**
+		 * @param { Date } date
+		 * @returns { string }
+		 */
+		format(date) {
+			return moment(date).local().format('[Remind at] l');
+		},
+
+		/**
+		 * @param {string} str
+		 * @returns {Date}
+		 */
+		parse(str) {
+			if (!str) {
+				return new Date();
+			}
+
+			if (str.indexOf('Remind at ') !== -1) {
+				str = str.split('Remind at ')[1];
+			}
+
+			return moment(str).toDate();
 		}
 	});
 
@@ -73,13 +104,23 @@
 		updateButton.hidden = true;
 		cancelButton.hidden = true;
 
-		dueDateInput.value = taskNode.entity.dueDateTime ? formatDueDate(taskNode.entity.dueDateTime.dateTime) : '';
-		remindDate.innerHTML = taskNode.entity.reminderDateTime
-			? `Reminder set at ${new Date(taskNode.entity.reminderDateTime.dateTime).toLocaleString()}`
-			: 'No reminder set';
+		/** @type {{dateTime: string;timeZone: string;}} */
+		const due = taskNode.entity.dueDateTime;
+		const remind = taskNode.entity.reminderDateTime;
+		dueDateInput.value = due ? formatDueDate(due) : '';
+
+		if (remind) {
+			reminderDate.value = formatReminderDate(remind);
+			reminderTime.type = 'time';
+			reminderTime.value = formatTime(remind);
+		} else {
+			reminderDate.value = '';
+			reminderTime.type = 'hidden';
+			reminderTime.value = '';
+		}
 	}
 
-	const onkeydown = () => {
+	const onchange = () => {
 		// TODO: only do this if the content had changed
 		if (updateButton.hidden) {
 			updateButton.hidden = false;
@@ -96,7 +137,9 @@
 						note: body.value,
 						id: currentNode.entity.id,
 						listId: currentNode.parent.entity.id,
-						dueDate: dueDateInput.value ? dueDateInput.value.split('Due ')[1] : ''
+						dueDate: dueDateInput.value ? dueDateInput.value.split('Due ')[1] : '',
+						reminderDate: reminderDate.value ? reminderDate.value.split('Remind at ')[1] : '',
+						reminderTime: reminderTime.value
 					}
 				});
 				currentNode.entity.title = title.value;
@@ -104,18 +147,29 @@
 			};
 
 			cancelButton.onclick = () => {
-				updateButton.hidden = true;
-				cancelButton.hidden = true;
-				title.value = currentNode.entity.title;
-				body.value = currentNode.entity.body.content;
-				dueDateInput.value = currentNode.entity.dueDateTime ? formatDueDate(currentNode.entity.dueDateTime.dateTime) : '';
+				changeTaskNode(currentNode);
 			};
 		}
 	};
 
-	title.onkeydown = () => onkeydown();
-	body.onkeydown = () => onkeydown();
-	dueDateInput.onchange = () => onkeydown();
+	title.onkeydown = () => onchange();
+	body.onkeydown = () => onchange();
+	dueDateInput.onchange = () => onchange();
+	reminderTime.onchange = () => onchange();
+	reminderDate.onchange = () => {
+		onchange();
+
+		// handle showing the reminder time
+		if (reminderDate.value) {
+			reminderTime.type = 'time';
+			if(!reminderTime.value) {
+				reminderTime.value = moment().add(1, 'hours').format('HH:mm');
+			}
+		} else {
+			reminderTime.type = 'hidden';
+			reminderTime.value = '';
+		}
+	};
 
 	const initialState = vscode.getState();
 	if (initialState) {

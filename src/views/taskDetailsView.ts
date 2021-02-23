@@ -63,6 +63,20 @@ export class TaskDetailsViewProvider extends WebviewViewBase implements vscode.W
 						};
 					}
 
+					if (message.body.reminderDate) {
+						if (!message.body.reminderTime) {
+							vscode.window.showErrorMessage('You need to specify a time when adding a Reminder.');
+							return;
+						}
+
+						const [ month, day, year ] = message.body.reminderDate.split('/');
+
+						body.reminderDateTime = {
+							dateTime: `${year}-${month}-${day}T${message.body.reminderTime}:00.0000000`,
+							timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
+						};
+					}
+
 					// TODO: error handling
 					await client.api(`/me/todo/lists/${message.body.listId}/tasks/${message.body.id}`).patch(body);
 
@@ -86,6 +100,8 @@ export class TaskDetailsViewProvider extends WebviewViewBase implements vscode.W
 		const styleMainUri = this._webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'webviews', 'taskDetailsView', 'main.css'));
 		const tdpCss = this._webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'node_modules', 'tiny-date-picker', 'tiny-date-picker.min.css'));
 		const tdpScript = this._webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'node_modules', 'tiny-date-picker', 'dist', 'tiny-date-picker.min.js'));
+		const momentScript = this._webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'node_modules', 'moment', 'min', 'moment.min.js'));
+		const momentTimezoneScript = this._webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'node_modules', 'moment-timezone', 'builds', 'moment-timezone-with-data-10-year-range.min.js'));
 		// Use a nonce to only allow a specific script to be run.
 		const nonce = getNonce();
 
@@ -107,16 +123,19 @@ export class TaskDetailsViewProvider extends WebviewViewBase implements vscode.W
 			</head>
 			<body>
 				<input placeholder='Add Title' type='text' class='task-title' value=''/>
+				<div class='task-reminder-form'>
+					<input placeholder='Add Reminder' type='text' class='task-reminder-date' value=''/>
+					<input type='hidden' class='task-reminder-time' />
+				</div>
 				<input placeholder='Add Due Date' type='text' class='task-duedate' value=''/>
 				<label for="task-body">Note</label>
 				<textarea placeholder='Add Note' class='task-body'></textarea>
 				<button class='update update-task' hidden>Update</button>
 				<button class='update update-cancel' hidden>Cancel</button>
-				<h3 class='tooltip'>Additional details:
-					<span class="tooltiptext">Edit these properties in the Microsoft To-Do app</span>
-				</h3>
-				<h4 class='task-reminder'>No reminder set</h4>
+
 				<script nonce="${nonce}" src="${tdpScript}"></script>
+				<script nonce="${nonce}" src="${momentScript}"></script>
+				<script nonce="${nonce}" src="${momentTimezoneScript}"></script>
 				<script nonce="${nonce}" src="${scriptUri}"></script>
 			</body>
 			</html>`;

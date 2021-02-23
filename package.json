@@ -247,6 +247,8 @@
 	"dependencies": {
 		"@microsoft/microsoft-graph-client": "^2.2.1",
 		"isomorphic-fetch": "^3.0.0",
+		"moment": "^2.29.1",
+		"moment-timezone": "^0.5.33",
 		"tiny-date-picker": "^3.2.8"
 	}
 }
