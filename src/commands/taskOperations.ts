@@ -58,17 +58,50 @@ export class TaskOperations extends vscode.Disposable {
 			}
 
 
-			const quickPickItems: vscode.QuickPickItem[] = taskLists.map(l => ({
+			const quickPickItems: Array<vscode.QuickPickItem & { id?: string }> = taskLists.map(l => ({
 				label: l.displayName || '',
 				...l
 			}));
+
+			quickPickItems.push({
+				label: 'Create a new list...',
+				id: 'new',
+			});
+
 			const chosen = await vscode.window.showQuickPick(quickPickItems, {
 				canPickMany: false,
 				ignoreFocusOut: true,
 				placeHolder: 'Which list would you like to add tasks to?'
 			});
 
-			listId = (chosen as TodoTaskList).id;
+			listId = (chosen as TodoTaskList)?.id;
+
+			if (listId === 'new') {
+				const displayName = await vscode.window.showInputBox({
+					prompt: 'Add a List',
+					placeHolder: 'Groceries',
+					ignoreFocusOut: true
+				});
+
+				// The user quit the prompt
+				if (!displayName) {
+					return;
+				}
+
+				// TODO: Error handling
+				const res = await client.api('/me/todo/lists').post({
+					displayName
+				});
+
+				listId = res.id;
+		
+				await vscode.commands.executeCommand('microsoft-todo-unoffcial.refreshList');
+			}
+		}
+
+		// The user quit the prompt
+		if (!listId) {
+			return;
 		}
 
 		const inputBoxOptions: vscode.InputBoxOptions = {
