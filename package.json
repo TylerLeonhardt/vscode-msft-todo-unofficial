@@ -5,7 +5,7 @@
 	"description": "",
 	"version": "0.0.1",
 	"engines": {
-		"vscode": "^1.52.0"
+		"vscode": "^1.55.0"
 	},
 	"categories": [
 		"Other"
@@ -235,7 +235,9 @@
 		"@types/isomorphic-fetch": "^0.0.35",
 		"@types/mocha": "^8.0.4",
 		"@types/node": "^12.11.7",
-		"@types/vscode": "^1.52.0",
+		"@types/randombytes": "^2.0.0",
+		"@types/uuid": "8.3.0",
+		"@types/vscode": "^1.55.0",
 		"@typescript-eslint/eslint-plugin": "^4.9.0",
 		"@typescript-eslint/parser": "^4.9.0",
 		"eslint": "^7.15.0",
@@ -249,6 +251,10 @@
 		"isomorphic-fetch": "^3.0.0",
 		"moment": "^2.29.1",
 		"moment-timezone": "^0.5.33",
-		"tiny-date-picker": "^3.2.8"
+		"tiny-date-picker": "^3.2.8",
+		"keytar": "^7.6.0",
+		"querystring": "^0.2.1",
+		"randombytes": "^2.1.0",
+		"uuid": "^8.3.2"
 	}
 }
