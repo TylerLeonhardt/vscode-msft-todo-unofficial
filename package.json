@@ -21,6 +21,10 @@
 				"title": "Login to Microsoft To-Do"
 			},
 			{
+				"command": "microsoft-todo-unoffcial.logout",
+				"title": "Logout of Microsoft To-Do"
+			},
+			{
 				"command": "microsoft-todo-unoffcial.refreshList",
 				"title": "Refresh",
 				"icon": {

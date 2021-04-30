@@ -13,7 +13,7 @@ import * as fetch from 'isomorphic-fetch';
 import { Keychain } from './keychain';
 
 const scope = 'Tasks.ReadWrite offline_access';
-const redirectUrl = 'https://vscode-redirect.azurewebsites.net/';
+const redirectUrl = 'https://extension-auth-redirect.azurewebsites.net/';
 const loginEndpointUrl = 'https://login.microsoftonline.com/';
 const clientId = 'a4fd7674-4ebd-4dbc-831c-338314dd459e';
 const tenant = 'common';
@@ -460,19 +460,6 @@ export class AzureActiveDirectoryService {
     }
 
     private getTokenFromResponse(json: ITokenResponse, scope: string, existingId?: string): IToken {
-        let claims = undefined;
-
-        try {
-            claims = this.getTokenClaims(json.access_token);
-        } catch (e) {
-            if (json.id_token) {
-                console.info('Failed to fetch token claims from access_token. Attempting to parse id_token instead');
-                claims = this.getTokenClaims(json.id_token);
-            } else {
-                throw e;
-            }
-        }
-
         return {
             expiresIn: json.expires_in,
             expiresAt: json.expires_in ? Date.now() + json.expires_in * 1000 : undefined,
@@ -480,10 +467,10 @@ export class AzureActiveDirectoryService {
             idToken: json.id_token,
             refreshToken: json.refresh_token,
             scope,
-            sessionId: existingId || `${claims.tid}/${(claims.oid || (claims.altsecid || '' + claims.ipd || ''))}/${uuid()}`,
+            sessionId: uuid(),
             account: {
-                label: claims.email || claims.unique_name || claims.preferred_username || 'user@example.com',
-                id: `${claims.tid}/${(claims.oid || (claims.altsecid || '' + claims.ipd || ''))}`
+                label: 'user@example.com',
+                id: '1234'
             }
         };
     }
