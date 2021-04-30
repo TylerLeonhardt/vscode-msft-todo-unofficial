@@ -5,13 +5,29 @@ import { TaskDetailsViewProvider } from './views/taskDetailsView';
 import { TaskOperations } from './commands/taskOperations';
 import { ListOperations } from './commands/listOperations';
 import 'isomorphic-fetch';
+import { AzureActiveDirectoryService } from './AADHelper';
 
 export async function activate(context: vscode.ExtensionContext) {
-	const clientProvider = new MicrosoftToDoClientFactory();
-	context.subscriptions.push(vscode.window.registerUriHandler(clientProvider));
+	const aadService = new AzureActiveDirectoryService(context);
+	await aadService.initialize();
 
+	
+	context.subscriptions.push(vscode.commands.registerCommand(
+		'microsoft-todo-unoffcial.login',
+		async () => {
+			await aadService.createSession();
+			vscode.commands.executeCommand('microsoft-todo-unoffcial.refreshList');
+		}));
+
+	context.subscriptions.push(vscode.commands.registerCommand(
+		'microsoft-todo-unoffcial.logout',
+		async () => {
+			await aadService.clearSessions();
+			vscode.commands.executeCommand('microsoft-todo-unoffcial.refreshList');
+		}));
+
+	const clientProvider = new MicrosoftToDoClientFactory(aadService);
 	const treeDataProvider = new MicrosoftToDoTreeDataProvider(clientProvider);
-	clientProvider.onDidAuthenticate(() => vscode.commands.executeCommand('microsoft-todo-unoffcial.refreshList'));
 	const view = vscode.window.createTreeView('microsoft-todo-unoffcial.listView', {
 		treeDataProvider,
 		showCollapseAll: true,

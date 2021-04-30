@@ -132,7 +132,6 @@ export class TaskDetailsViewProvider extends WebviewViewBase implements vscode.W
 				<textarea placeholder='Add Note' class='task-body'></textarea>
 				<button class='update update-task' hidden>Update</button>
 				<button class='update update-cancel' hidden>Cancel</button>
-
 				<script nonce="${nonce}" src="${tdpScript}"></script>
 				<script nonce="${nonce}" src="${momentScript}"></script>
 				<script nonce="${nonce}" src="${momentTimezoneScript}"></script>
