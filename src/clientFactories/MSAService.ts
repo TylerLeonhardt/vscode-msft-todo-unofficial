@@ -11,6 +11,7 @@ import * as vscode from 'vscode';
 import { v4 as uuid } from 'uuid';
 import * as fetch from 'isomorphic-fetch';
 import { Keychain } from './keychain';
+import { IAuthService } from './AuthService';
 
 const scope = 'Tasks.ReadWrite offline_access';
 const redirectUrl = 'https://extension-auth-redirect.azurewebsites.net/';
@@ -107,7 +108,7 @@ class UriEventHandler extends vscode.EventEmitter<vscode.Uri> implements vscode.
     }
 }
 
-export class AzureActiveDirectoryService {
+export class MSAService implements IAuthService {
     private _tokens: IToken[] = [];
     private _refreshTimeouts: Map<string, NodeJS.Timeout> = new Map<string, NodeJS.Timeout>();
     private _uriHandler: UriEventHandler;

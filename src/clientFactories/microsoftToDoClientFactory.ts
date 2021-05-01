@@ -1,19 +1,23 @@
 import { Client } from '@microsoft/microsoft-graph-client';
 import * as vscode from 'vscode';
-import { AzureActiveDirectoryService } from '../AADHelper';
+import { AADService } from './AADService';
+import { MSAService } from './MSAService';
 
 export class MicrosoftToDoClientFactory {
-	constructor(private aadService: AzureActiveDirectoryService) {}
+	private loginType: 'msa' | 'aad' | undefined;
+	constructor(private msaService: MSAService, private aadService: AADService) {}
 
 	public async getClient(): Promise<Client | undefined> {
-		const sessions = await this.aadService.sessions
-		if (!sessions?.length) {
+		const session = this.loginType === 'msa'
+			? (await this.msaService.getSessions())[0]
+			: (await this.aadService.getSessions())[0];
+		if (!session) {
 			return;
 		}
 
 		return Client.init({
 			authProvider: (done) => {
-				done(undefined, sessions[0].accessToken);
+				done(undefined, session.accessToken);
 			}
 		});
 	}
@@ -28,5 +32,14 @@ export class MicrosoftToDoClientFactory {
 		}
 
 		return list;
+	}
+
+	public async clearSessions() {
+		await this.msaService.clearSessions();
+		await this.aadService.clearSessions();
+	}
+
+	public setLoginType(type: 'msa' | 'aad') {
+		this.loginType = type;
 	}
 }
