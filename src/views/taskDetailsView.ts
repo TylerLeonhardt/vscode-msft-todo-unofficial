@@ -61,6 +61,8 @@ export class TaskDetailsViewProvider extends WebviewViewBase implements vscode.W
 							dateTime: `${year}-${month}-${day}T08:00:00.0000000`,
 							timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
 						};
+					} else {
+						body.dueDateTime = null;
 					}
 
 					if (message.body.reminderDate) {
@@ -75,6 +77,8 @@ export class TaskDetailsViewProvider extends WebviewViewBase implements vscode.W
 							dateTime: `${year}-${month}-${day}T${message.body.reminderTime}:00.0000000`,
 							timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
 						};
+					} else {
+						body.reminderDateTime = null;
 					}
 
 					// TODO: error handling
