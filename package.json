@@ -1,8 +1,8 @@
 {
 	"name": "msft-todo-unofficial",
-	"displayName": "Microsoft To-Do (Unofficial)",
+	"displayName": "Microsoft To Do (Unofficial)",
 	"publisher": "tylerleonhardt",
-	"description": "Interact with Microsoft To-Do right in VS Code!",
+	"description": "Interact with Microsoft To Do right in VS Code!",
 	"version": "0.0.2",
 	"icon": "resources/icon.png",
 	"repository": {
@@ -22,15 +22,18 @@
 		"commands": [
 			{
 				"command": "microsoft-todo-unoffcial.login",
-				"title": "Login to Microsoft To-Do"
+				"title": "Login",
+				"category": "Microsoft To Do (Unofficial)"
 			},
 			{
 				"command": "microsoft-todo-unoffcial.logout",
-				"title": "Logout of Microsoft To-Do"
+				"title": "Logout",
+				"category": "Microsoft To Do (Unofficial)"
 			},
 			{
 				"command": "microsoft-todo-unoffcial.refreshList",
 				"title": "Refresh",
+				"category": "Microsoft To Do (Unofficial)",
 				"icon": {
 					"dark": "./resources/dark/refresh.svg",
 					"light": "./resources/light/refresh.svg"
@@ -70,7 +73,8 @@
 			},
 			{
 				"command": "microsoft-todo-unoffcial.createTask",
-				"title": "Create a task",
+				"title": "Create tasks",
+				"category": "Microsoft To Do (Unofficial)",
 				"icon": {
 					"dark": "./resources/dark/add.svg",
 					"light": "./resources/light/add.svg"
@@ -87,6 +91,7 @@
 			{
 				"command": "microsoft-todo-unoffcial.createList",
 				"title": "Create a list",
+				"category": "Microsoft To Do (Unofficial)",
 				"icon": {
 					"dark": "./resources/dark/add.svg",
 					"light": "./resources/light/add.svg"
@@ -99,28 +104,15 @@
 					"dark": "./resources/dark/trash.svg",
 					"light": "./resources/light/trash.svg"
 				}
-			},
-			{
-				"command": "microsoft-todo-unoffcial.openList",
-				"title": "Open list"
-			},
-			{
-				"command": "microsoft-todo-unofficial.toggleTask",
-				"title": "Toggle task"
 			}
 		],
 		"keybindings": [
-			{
-				"command": "microsoft-todo-unofficial.toggleTask",
-				"key": "space",
-				"when": "editorTextFocus && resourceScheme == microsoft-todo-unofficial"
-			}
 		],
 		"viewsContainers": {
 			"activitybar": [
 				{
 					"id": "microsoft-todo-unoffcial",
-					"title": "Microsoft To-Do (Unofficial)",
+					"title": "Microsoft To Do (Unofficial)",
 					"icon": "./resources/dark/checklist.svg"
 				}
 			]
@@ -129,7 +121,7 @@
 			"microsoft-todo-unoffcial": [
 				{
 					"id": "microsoft-todo-unoffcial.listView",
-					"name": "Microsoft To-Do",
+					"name": "Microsoft To Do",
 					"type": "tree",
 					"visibility": "visible"
 				},
@@ -139,17 +131,45 @@
 					"type": "webview",
 					"visibility": "hidden",
 					"when": "showTaskDetailsView",
-					"contextualTitle": "To-Do Task details"
+					"contextualTitle": "To Do Task details"
 				}
 			]
 		},
 		"viewsWelcome": [
 			{
 				"view": "microsoft-todo-unoffcial.listView",
-				"contents": "Login to see your Microsoft To-Do lists.\n[Login](command:microsoft-todo-unoffcial.login)"
+				"contents": "Login to see your Microsoft To Do lists.\n[Login](command:microsoft-todo-unoffcial.login)"
 			}
 		],
 		"menus": {
+			"commandPalette": [
+				
+				{
+					"COMMANDS THAT SHOULD NOT SHOW UP IN THE COMMAND PALETTE":"",
+					"command": "microsoft-todo-unoffcial.deleteList",
+					"when": "false"
+				},
+				{
+					"command": "microsoft-todo-unoffcial.deleteTask",
+					"when": "false"
+				},
+				{
+					"command": "microsoft-todo-unoffcial.star",
+					"when": "false"
+				},
+				{
+					"command": "microsoft-todo-unoffcial.unstar",
+					"when": "false"
+				},
+				{
+					"command": "microsoft-todo-unoffcial.complete",
+					"when": "false"
+				},
+				{
+					"command": "microsoft-todo-unoffcial.uncomplete",
+					"when": "false"
+				}
+			],
 			"view/item/context": [
 				{
 					"command": "microsoft-todo-unoffcial.refreshList",
@@ -210,20 +230,17 @@
 					"command": "microsoft-todo-unoffcial.deleteList",
 					"when": "viewItem == list",
 					"group": "z_commands@200"
-				},
-				{
-					"command": "microsoft-todo-unoffcial.openList",
-					"when": "viewItem == list",
-					"group": "z_commands@100"
 				}
 			],
 			"view/title": [
 				{
 					"command": "microsoft-todo-unoffcial.refreshList",
+					"when": "view == microsoft-todo-unoffcial.listView",
 					"group": "navigation"
 				},
 				{
 					"command": "microsoft-todo-unoffcial.createTask",
+					"when": "view == microsoft-todo-unoffcial.listView",
 					"group": "navigation"
 				}
 			]
