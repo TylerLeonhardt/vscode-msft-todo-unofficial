@@ -141,7 +141,7 @@ export class TaskOperations extends vscode.Disposable {
 
 		const tasksFormatted = tasks ? `${tasks.map(t => t.entity.title).join('", "')}` : task.entity.title;
 		const choice = await vscode.window.showWarningMessage(
-			`"${tasksFormatted}" will be permanently deleted. You won't be able to undo this action.`,
+			`"${tasksFormatted}" will be permanently deleted. You won't be able to undo this action.`, { modal: true },
 			expected, 'Cancel');
 
 		if (choice !== expected) {
