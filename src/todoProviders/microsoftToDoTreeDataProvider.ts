@@ -16,6 +16,10 @@ interface CreateListNode {
 	nodeType: 'create-list';
 }
 
+interface ImportantListNode {
+	nodeType: 'important-list';
+}
+
 interface StatusNode {
 	nodeType: 'status';
 	statusType: TaskStatusType;
@@ -28,36 +32,54 @@ export interface TaskNode {
 	parent: ListNode;
 }
 
-type ToDoEntity = TaskNode | StatusNode | ListNode | CreateListNode;
+type ToDoEntity = TaskNode | StatusNode | ListNode | CreateListNode | ImportantListNode;
 
 export class MicrosoftToDoTreeDataProvider extends vscode.Disposable implements vscode.TreeDataProvider<ToDoEntity> {
 	private didChangeTreeData = new vscode.EventEmitter<void | ToDoEntity | undefined>();
 	onDidChangeTreeData?: vscode.Event<void | ToDoEntity | undefined> = this.didChangeTreeData.event;
 
-	private readonly refreshCommand: vscode.Disposable;
+	private readonly disposibles: vscode.Disposable[] = [];
+	private importanceFilter = false; 
+	private importantNode: ImportantListNode | undefined;
 
 	constructor(private clientFactory: MicrosoftToDoClientFactory) {
 		super(() => this.dispose());
 
-		this.refreshCommand = vscode.commands.registerCommand(
+		this.disposibles.push(vscode.commands.registerCommand(
 			'microsoft-todo-unoffcial.refreshList',
-			(element?: ToDoEntity) => this.didChangeTreeData.fire(element));
+			(element?: ToDoEntity) => this.didChangeTreeData.fire(element)));
 
-		this.refreshCommand = vscode.commands.registerCommand(
+		this.disposibles.push(vscode.commands.registerCommand(
 			'microsoft-todo-unoffcial.complete',
-			(node: TaskNode, nodes: TaskNode[] | undefined) => nodes ? this.changeCompletedState(nodes) : this.changeCompletedState([node]));
+			(node: TaskNode, nodes: TaskNode[] | undefined) => nodes ? this.changeCompletedState(nodes) : this.changeCompletedState([node])));
 
-		this.refreshCommand = vscode.commands.registerCommand(
+		this.disposibles.push(vscode.commands.registerCommand(
 			'microsoft-todo-unoffcial.uncomplete',
-			(node: TaskNode, nodes: TaskNode[] | undefined) => nodes ? this.changeCompletedState(nodes) : this.changeCompletedState([node]));
+			(node: TaskNode, nodes: TaskNode[] | undefined) => nodes ? this.changeCompletedState(nodes) : this.changeCompletedState([node])));
 
-		this.refreshCommand = vscode.commands.registerCommand(
+		this.disposibles.push(vscode.commands.registerCommand(
 			'microsoft-todo-unoffcial.star',
-			(node: TaskNode, nodes: TaskNode[] | undefined) => nodes ? this.changeImportanceState(nodes) : this.changeImportanceState([node]));
+			(node: TaskNode, nodes: TaskNode[] | undefined) => nodes ? this.changeImportanceState(nodes) : this.changeImportanceState([node])));
 
-		this.refreshCommand = vscode.commands.registerCommand(
+		this.disposibles.push(vscode.commands.registerCommand(
 			'microsoft-todo-unoffcial.unstar',
-			(node: TaskNode, nodes: TaskNode[] | undefined) => nodes ? this.changeImportanceState(nodes) : this.changeImportanceState([node]));
+			(node: TaskNode, nodes: TaskNode[] | undefined) => nodes ? this.changeImportanceState(nodes) : this.changeImportanceState([node])));
+
+		this.disposibles.push(vscode.commands.registerCommand(
+			'microsoft-todo-unoffcial.starFilter',
+			async () => {
+				this.importanceFilter = true;
+				await vscode.commands.executeCommand('setContext', 'starFilter', true);
+				this.didChangeTreeData.fire();
+			}));
+
+		this.disposibles.push(vscode.commands.registerCommand(
+			'microsoft-todo-unoffcial.unstarFilter',
+			async () => {
+				this.importanceFilter = false;
+				await vscode.commands.executeCommand('setContext', 'starFilter', false);
+				this.didChangeTreeData.fire();
+			}));
 	}
 
 	async changeCompletedState(nodes: TaskNode[]) {
@@ -86,6 +108,9 @@ export class MicrosoftToDoTreeDataProvider extends vscode.Disposable implements 
 
 		// TODO: Error handling
 		await Promise.all(promises);
+		if (this.importantNode) {
+			this.didChangeTreeData.fire(this.importantNode);
+		}
 	}
 
 	getTreeItem(element: ToDoEntity): vscode.TreeItem | Thenable<vscode.TreeItem> {
@@ -141,6 +166,11 @@ export class MicrosoftToDoTreeDataProvider extends vscode.Disposable implements 
 					label: statusLabel
 				}, collapse);
 				break;
+			case 'important-list':
+				treeItem = new vscode.TreeItem({
+					label: '⭐️ Important'
+				}, vscode.TreeItemCollapsibleState.Collapsed);
+				break;
 		}
 
 		return treeItem;
@@ -153,9 +183,11 @@ export class MicrosoftToDoTreeDataProvider extends vscode.Disposable implements 
 		}
 
 		if (!element) {
-			const taskLists: TodoTask[] = await this.clientFactory.getAll(client, '/me/todo/lists');
+			const taskLists: TodoTaskList[] = await this.clientFactory.getAll(client, '/me/todo/lists');
 
-			const nodes: ToDoEntity[] = taskLists.map(entity => ({ nodeType: 'list', entity }));
+			this.importantNode = { nodeType: 'important-list' };
+			const nodes: ToDoEntity[] = [this.importantNode];
+			taskLists.forEach(entity => nodes.push({ nodeType: 'list', entity }));
 			nodes.push({ nodeType: 'create-list' });
 			return nodes;
 		}
@@ -164,7 +196,11 @@ export class MicrosoftToDoTreeDataProvider extends vscode.Disposable implements 
 
 			const getTasks = async (getCompleted: boolean): Promise<TaskNode[]> => {
 				const comparison = getCompleted ? 'eq' : 'ne';
-				const tasks: TodoTask[] = await this.clientFactory.getAll(client, `/me/todo/lists/${(element.entity as TodoTaskList).id}/tasks?$filter= status ${comparison} 'completed'`);
+				let filter = `status ${comparison} 'completed'`;
+				if (this.importanceFilter) {
+					filter += ` and importance eq 'high'`;
+				}
+				const tasks: TodoTask[] = await this.clientFactory.getAll(client, `/me/todo/lists/${(element.entity as TodoTaskList).id}/tasks?$filter=${filter}`);
 
 				return tasks.map(entity => ({
 					nodeType: 'task',
@@ -190,9 +226,31 @@ export class MicrosoftToDoTreeDataProvider extends vscode.Disposable implements 
 		if (element.nodeType === 'status') {
 			return await element.getChildren();
 		}
+
+		if (element.nodeType === 'important-list') {
+			const filter = `status ne 'completed' and importance eq 'high'`;
+			const listEntities: TodoTaskList[] = await this.clientFactory.getAll(client, '/me/todo/lists');
+			const entities: ToDoEntity[] = [];
+			for (const entity of listEntities) {
+				const tasks: TodoTask[] = await this.clientFactory.getAll(client, `/me/todo/lists/${entity.id}/tasks?$filter=${filter}`);
+
+				tasks.forEach(t => {
+					entities.push({
+						nodeType: 'task',
+						entity: t,
+						parent: {
+							entity,
+							nodeType: 'list'
+						}
+					});
+				});
+			}
+
+			return entities;
+		}
 	}
 
 	public dispose() {
-		this.refreshCommand.dispose();
+		this.disposibles.forEach(d => d.dispose());
 	}
 }

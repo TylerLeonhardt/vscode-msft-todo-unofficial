@@ -3,7 +3,7 @@
 	"displayName": "Microsoft To Do (Unofficial)",
 	"publisher": "tylerleonhardt",
 	"description": "Interact with Microsoft To Do right in VS Code!",
-	"version": "0.0.2",
+	"version": "0.0.4",
 	"icon": "resources/icon.png",
 	"repository": {
 		"url": "https://github.com/TylerLeonhardt/vscode-msft-todo-official"
@@ -66,6 +66,24 @@
 			{
 				"command": "microsoft-todo-unoffcial.unstar",
 				"title": "Unstar task",
+				"icon": {
+					"dark": "./resources/dark/star-full.svg",
+					"light": "./resources/light/star-full.svg"
+				}
+			},
+			{
+				"command": "microsoft-todo-unoffcial.starFilter",
+				"title": "Only show starred tasks",
+				"category": "Microsoft To Do (Unofficial)",
+				"icon": {
+					"dark": "./resources/dark/star-empty.svg",
+					"light": "./resources/light/star-empty.svg"
+				}
+			},
+			{
+				"command": "microsoft-todo-unoffcial.unstarFilter",
+				"title": "Show all tasks",
+				"category": "Microsoft To Do (Unofficial)",
 				"icon": {
 					"dark": "./resources/dark/star-full.svg",
 					"light": "./resources/light/star-full.svg"
@@ -143,7 +161,6 @@
 		],
 		"menus": {
 			"commandPalette": [
-				
 				{
 					"COMMANDS THAT SHOULD NOT SHOW UP IN THE COMMAND PALETTE":"",
 					"command": "microsoft-todo-unoffcial.deleteList",
@@ -236,12 +253,22 @@
 				{
 					"command": "microsoft-todo-unoffcial.refreshList",
 					"when": "view == microsoft-todo-unoffcial.listView",
-					"group": "navigation"
+					"group": "navigation@2"
 				},
 				{
 					"command": "microsoft-todo-unoffcial.createTask",
 					"when": "view == microsoft-todo-unoffcial.listView",
-					"group": "navigation"
+					"group": "navigation@1"
+				},
+				{
+					"command": "microsoft-todo-unoffcial.starFilter",
+					"when": "view == microsoft-todo-unoffcial.listView && !starFilter",
+					"group": "navigation@3"
+				},
+				{
+					"command": "microsoft-todo-unoffcial.unstarFilter",
+					"when": "view == microsoft-todo-unoffcial.listView && starFilter",
+					"group": "navigation@3"
 				}
 			]
 		}
