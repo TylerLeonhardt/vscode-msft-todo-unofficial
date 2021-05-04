@@ -129,6 +129,17 @@
 					"dark": "./resources/dark/trash.svg",
 					"light": "./resources/light/trash.svg"
 				}
+			},
+			{
+				"command": "microsoft-todo-unoffcial.showTaskDetailsView",
+				"title": "Show task details view",
+				"category": "Microsoft To Do (Unofficial)"
+			},
+			{
+				"command": "microsoft-todo-unoffcial.hideTaskDetailsView",
+				"title": "Hide task details view",
+				"category": "Microsoft To Do (Unofficial)",
+				"icon": "$(close)"
 			}
 		],
 		"keybindings": [
@@ -276,6 +287,11 @@
 					"command": "microsoft-todo-unoffcial.unstarFilter",
 					"when": "view == microsoft-todo-unoffcial.listView && starFilter",
 					"group": "navigation@3"
+				},
+				{
+					"command": "microsoft-todo-unoffcial.hideTaskDetailsView",
+					"when": "view == microsoft-todo-unoffcial.taskDetailsView",
+					"group": "navigation@1"
 				}
 			]
 		}

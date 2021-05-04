@@ -69,6 +69,18 @@ export async function activate(context: vscode.ExtensionContext) {
 		taskDetailsProvider
 	);
 	context.subscriptions.push(detailsView);
+
+	context.subscriptions.push(vscode.commands.registerCommand(
+		'microsoft-todo-unoffcial.showTaskDetailsView',
+		async () => {
+			await vscode.commands.executeCommand('setContext', 'showTaskDetailsView', true);
+		}));
+
+	context.subscriptions.push(vscode.commands.registerCommand(
+		'microsoft-todo-unoffcial.hideTaskDetailsView',
+		async () => {
+			await vscode.commands.executeCommand('setContext', 'showTaskDetailsView', false);
+		}));
 	
 	const taskOps = new TaskOperations(clientProvider);
 	const listOps = new ListOperations(clientProvider);
