@@ -106,7 +106,8 @@ export class TaskOperations extends vscode.Disposable {
 
 		const inputBoxOptions: vscode.InputBoxOptions = {
 			prompt: 'Add a Task',
-			placeHolder: 'Eat my veggies'
+			placeHolder: 'Eat my veggies',
+			ignoreFocusOut: true
 		};
 
 		let title = await vscode.window.showInputBox(inputBoxOptions);

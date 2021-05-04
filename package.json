@@ -15,7 +15,14 @@
 		"Other"
 	],
 	"activationEvents": [
-		"onView:microsoft-todo-unoffcial.listView"
+		"onView:microsoft-todo-unoffcial.listView",
+		"onCommand:microsoft-todo-unoffcial.login",
+		"onCommand:microsoft-todo-unoffcial.logout",
+		"onCommand:microsoft-todo-unoffcial.refreshList",
+		"onCommand:microsoft-todo-unoffcial.starFilter",
+		"onCommand:microsoft-todo-unoffcial.unstarFilter",
+		"onCommand:microsoft-todo-unoffcial.createTask",
+		"onCommand:microsoft-todo-unoffcial.createList"
 	],
 	"main": "./out/extension.js",
 	"contributes": {

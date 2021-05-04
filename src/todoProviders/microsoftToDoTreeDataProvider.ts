@@ -124,8 +124,13 @@ export class MicrosoftToDoTreeDataProvider extends vscode.Disposable implements 
 				};
 				break;
 			case 'list':
-				treeItem = new vscode.TreeItem(element.entity.displayName || "", vscode.TreeItemCollapsibleState.Collapsed);
+				treeItem = new vscode.TreeItem({
+					label: element.entity.displayName || '',
+				}, vscode.TreeItemCollapsibleState.Collapsed);
 				treeItem.contextValue = element.nodeType;
+				if (element.entity.isShared) {
+					treeItem.description = '👥';
+				}
 				break;
 			case 'task':
 				let label = element.entity.title || "";
