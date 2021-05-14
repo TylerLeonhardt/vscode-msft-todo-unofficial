@@ -11,6 +11,7 @@ import * as vscode from 'vscode';
 import { v4 as uuid } from 'uuid';
 import * as fetch from 'isomorphic-fetch';
 import { Keychain } from './keychain';
+import { createServer, startServer } from './authServer';
 
 const redirectUrl = 'https://extension-auth-redirect.azurewebsites.net/';
 const loginEndpointUrl = 'https://login.microsoftonline.com/';
@@ -300,7 +301,6 @@ export class MSAService {
         try {
             return JSON.parse(Buffer.from(jwt.split('.')[1], 'base64').toString());
         } catch (e) {
-            console.error(e.message);
             throw new Error('Unable to read token claims');
         }
     }
@@ -321,7 +321,76 @@ export class MSAService {
 
     public async createSession(scopes: string[]): Promise<vscode.AuthenticationSession> {
         console.info('Logging in...');
-        return await this.loginWithoutLocalServer(scopes);
+
+        const runsRemote = vscode.env.remoteName !== undefined;
+		const runsServerless = vscode.env.remoteName === undefined && vscode.env.uiKind === vscode.UIKind.Web;
+        if (runsRemote || runsServerless) {
+            return await this.loginWithoutLocalServer(scopes);
+        }
+
+        const scopeStr = scopes.sort().join(' ');
+        const nonce = randomBytes(16).toString('base64');
+		const { server, redirectPromise, codePromise } = createServer(nonce);
+
+        let token: IToken | undefined;
+        try {
+            const port = await startServer(server);
+            vscode.env.openExternal(vscode.Uri.parse(`http://localhost:${port}/signin?nonce=${encodeURIComponent(nonce)}`));
+
+            const redirectReq = await redirectPromise;
+            if ('err' in redirectReq) {
+                const { err, res } = redirectReq;
+                res.writeHead(302, { Location: `/?error=${encodeURIComponent(err && err.message || 'Unknown error')}` });
+                res.end();
+                throw err;
+            }
+
+            const host = redirectReq.req.headers.host || '';
+            const updatedPortStr = (/^[^:]+:(\d+)$/.exec(Array.isArray(host) ? host[0] : host) || [])[1];
+            const updatedPort = updatedPortStr ? parseInt(updatedPortStr, 10) : port;
+
+            const state = `${updatedPort},${encodeURIComponent(nonce)}`;
+
+            const codeVerifier = toBase64UrlEncoding(randomBytes(32).toString('base64'));
+            const codeChallenge = toBase64UrlEncoding(await sha256(codeVerifier));
+            const loginUrl = `${loginEndpointUrl}${tenant}/oauth2/v2.0/authorize?response_type=code&response_mode=query&client_id=${encodeURIComponent(clientId)}&redirect_uri=${encodeURIComponent(redirectUrl)}&state=${state}&scope=${encodeURIComponent(scopeStr)}&prompt=select_account&code_challenge_method=S256&code_challenge=${codeChallenge}`;
+
+            await redirectReq.res.writeHead(302, { Location: loginUrl });
+            redirectReq.res.end();
+
+            const codeRes = await codePromise;
+            const res = codeRes.res;
+
+            try {
+                if ('err' in codeRes) {
+                    throw codeRes.err;
+                }
+                token = await this.exchangeCodeForToken(codeRes.code, codeVerifier, scopeStr);
+                this.setToken(token, scopeStr);
+                console.log('Login successful');
+                const session = await this.convertToSession(token);
+                res.writeHead(302, { Location: '/' });
+                return session;
+            } catch (err) {
+                res.writeHead(302, { Location: `/?error=${encodeURIComponent(err && err.message || 'Unknown error')}` });
+                throw err;
+            } finally {
+                res.end();
+            }
+        } catch (e) {
+            console.error(e.message);
+
+            // If the error was about starting the server, try directly hitting the login endpoint instead
+            if (e.message === 'Error listening to server' || e.message === 'Closed' || e.message === 'Timeout waiting for port') {
+                return await this.loginWithoutLocalServer(scopes);
+            }
+
+            throw e;
+        } finally {
+            setTimeout(() => {
+                server.close();
+            }, 5000);
+        }
     }
 
     public dispose(): void {
@@ -356,7 +425,7 @@ export class MSAService {
         let uri = vscode.Uri.parse(signInUrl);
         const codeVerifier = toBase64UrlEncoding(randomBytes(32).toString('base64'));
         const codeChallenge = toBase64UrlEncoding(await sha256(codeVerifier));
-        const scopeStr = scopes.join(' ');
+        const scopeStr = scopes.sort().join(' ');
         uri = uri.with({
             query: `response_type=code&client_id=${encodeURIComponent(clientId)}&response_mode=query&redirect_uri=${redirectUrl}&state=${state}&scope=${scopeStr}&prompt=select_account&code_challenge_method=S256&code_challenge=${codeChallenge}`
         });
