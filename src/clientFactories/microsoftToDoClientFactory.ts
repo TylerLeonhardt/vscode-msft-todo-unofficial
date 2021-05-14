@@ -1,23 +1,28 @@
 import { Client } from '@microsoft/microsoft-graph-client';
 import * as vscode from 'vscode';
-import { AADService } from './AADService';
-import { MSAService } from './MSAService';
 
 export class MicrosoftToDoClientFactory {
-	private loginType: 'msa' | 'aad' | undefined;
-	constructor(private msaService: MSAService, private aadService: AADService) {}
+	static scopes: string[] = ['Tasks.ReadWrite', 'offline_access', 'openid', 'profile'];
+	private loginType: 'msa' | 'microsoft' | undefined;
+	private session: vscode.AuthenticationSession | undefined;
+
+	constructor(private globalState: vscode.Memento) {
+
+	}
 
 	public async getClient(): Promise<Client | undefined> {
-		const session = this.loginType === 'msa'
-			? (await this.msaService.getSessions())[0]
-			: (await this.aadService.getSessions())[0];
-		if (!session) {
+		if (!this.loginType) {
+			return;
+		}
+
+		this.session = await vscode.authentication.getSession(this.loginType, MicrosoftToDoClientFactory.scopes);
+		if (!this.session) {
 			return;
 		}
 
 		return Client.init({
 			authProvider: (done) => {
-				done(undefined, session.accessToken);
+				done(undefined, this.session!.accessToken);
 			}
 		});
 	}
@@ -34,12 +39,22 @@ export class MicrosoftToDoClientFactory {
 		return list;
 	}
 
-	public async clearSessions() {
-		await this.msaService.clearSessions();
-		await this.aadService.clearSessions();
+	public setLoginType(type: 'msa' | 'microsoft' | undefined) {
+		this.loginType = type;
 	}
 
-	public setLoginType(type: 'msa' | 'aad') {
-		this.loginType = type;
+	public async clearLoginTypeState(e: vscode.AuthenticationSessionsChangeEvent) {
+		if (e.provider.id !== 'msa' && e.provider.id !== 'microsoft') {
+			return;
+		}
+		
+		// we already cleared the state
+		if (!this.loginType) {
+			return;
+		}
+
+		await this.globalState.update('microsoftToDoUnofficialLoginType', {});
+		this.setLoginType(undefined);
+		await vscode.commands.executeCommand('microsoft-todo-unoffcial.refreshList');
 	}
 }

@@ -3,7 +3,7 @@
 	"displayName": "Microsoft To Do (Unofficial)",
 	"publisher": "tylerleonhardt",
 	"description": "Interact with Microsoft To Do right in VS Code!",
-	"version": "0.0.5",
+	"version": "0.0.6",
 	"icon": "resources/icon.png",
 	"repository": {
 		"url": "https://github.com/TylerLeonhardt/vscode-msft-todo-official"
@@ -17,7 +17,6 @@
 	"activationEvents": [
 		"onView:microsoft-todo-unoffcial.listView",
 		"onCommand:microsoft-todo-unoffcial.login",
-		"onCommand:microsoft-todo-unoffcial.logout",
 		"onCommand:microsoft-todo-unoffcial.refreshList",
 		"onCommand:microsoft-todo-unoffcial.starFilter",
 		"onCommand:microsoft-todo-unoffcial.unstarFilter",
@@ -30,11 +29,6 @@
 			{
 				"command": "microsoft-todo-unoffcial.login",
 				"title": "Login",
-				"category": "Microsoft To Do (Unofficial)"
-			},
-			{
-				"command": "microsoft-todo-unoffcial.logout",
-				"title": "Logout",
 				"category": "Microsoft To Do (Unofficial)"
 			},
 			{

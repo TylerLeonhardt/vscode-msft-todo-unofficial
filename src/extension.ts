@@ -5,45 +5,39 @@ import { TaskDetailsViewProvider } from './views/taskDetailsView';
 import { TaskOperations } from './commands/taskOperations';
 import { ListOperations } from './commands/listOperations';
 import 'isomorphic-fetch';
-import { MSAService } from './clientFactories/MSAService';
-import { AADService } from './clientFactories/AADService';
+import { MsaAuthProvider } from './clientFactories/MsaAuthProvider';
 
 export async function activate(context: vscode.ExtensionContext) {
-	const msaService = new MSAService(context);
-	const aadService = new AADService();
-	await msaService.initialize();
-	const clientProvider = new MicrosoftToDoClientFactory(msaService, aadService);
-	const loginType: { type: 'msa' | 'aad' } | undefined = context.globalState.get('microsoftToDoUnofficialLoginType');
+	const auth = new MsaAuthProvider(context);
+	await auth.initialize();
+	vscode.authentication.registerAuthenticationProvider(MsaAuthProvider.id, 'Microsoft Account (MSA)', auth, {
+		supportsMultipleAccounts: false
+	});
+
+	const clientProvider = new MicrosoftToDoClientFactory(context.globalState);
+	const loginType: { type?: 'msa' | 'microsoft' } | undefined = context.globalState.get('microsoftToDoUnofficialLoginType');
 	if (loginType) {
 		clientProvider.setLoginType(loginType.type);
 	}
 
+	let disposable: vscode.Disposable;
 	context.subscriptions.push(vscode.commands.registerCommand(
 		'microsoft-todo-unoffcial.login',
 		async () => {
 			const result = await vscode.window.showQuickPick(['Microsoft account', 'Work or School account']);
-			switch (result) {
-				case 'Microsoft account':
-					await msaService.createSession();
-					await context.globalState.update('microsoftToDoUnofficialLoginType', { type: 'msa' });
-					clientProvider.setLoginType('msa');
-					break;
-				case 'Work or School account': 
-					await aadService.createSession();
-					await context.globalState.update('microsoftToDoUnofficialLoginType', { type: 'aad' });
-					clientProvider.setLoginType('aad');
-					break;
+
+			if (!result) {
+				return;
 			}
 
+			const provider = result === 'Microsoft account' ? 'msa' : 'microsoft';
+			await vscode.authentication.getSession(provider, MicrosoftToDoClientFactory.scopes, { createIfNone: true });
+			await context.globalState.update('microsoftToDoUnofficialLoginType', { type: provider });
+			clientProvider.setLoginType(provider);
 			vscode.commands.executeCommand('microsoft-todo-unoffcial.refreshList');
 		}));
 
-	context.subscriptions.push(vscode.commands.registerCommand(
-		'microsoft-todo-unoffcial.logout',
-		async () => {
-			await clientProvider.clearSessions();
-			vscode.commands.executeCommand('microsoft-todo-unoffcial.refreshList');
-		}));
+	context.subscriptions.push(disposable = vscode.authentication.onDidChangeSessions((e) => clientProvider.clearLoginTypeState(e)));
 
 	const treeDataProvider = new MicrosoftToDoTreeDataProvider(clientProvider);
 	const view = vscode.window.createTreeView('microsoft-todo-unoffcial.listView', {

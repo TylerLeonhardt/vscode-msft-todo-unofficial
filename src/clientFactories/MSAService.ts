@@ -11,9 +11,7 @@ import * as vscode from 'vscode';
 import { v4 as uuid } from 'uuid';
 import * as fetch from 'isomorphic-fetch';
 import { Keychain } from './keychain';
-import { IAuthService } from './AuthService';
 
-const scope = 'Tasks.ReadWrite offline_access';
 const redirectUrl = 'https://extension-auth-redirect.azurewebsites.net/';
 const loginEndpointUrl = 'https://login.microsoftonline.com/';
 const clientId = 'a4fd7674-4ebd-4dbc-831c-338314dd459e';
@@ -108,7 +106,7 @@ class UriEventHandler extends vscode.EventEmitter<vscode.Uri> implements vscode.
     }
 }
 
-export class MSAService implements IAuthService {
+export class MSAService {
     private _tokens: IToken[] = [];
     private _refreshTimeouts: Map<string, NodeJS.Timeout> = new Map<string, NodeJS.Timeout>();
     private _uriHandler: UriEventHandler;
@@ -128,7 +126,7 @@ export class MSAService implements IAuthService {
     }
 
     public async initialize(): Promise<void> {
-        const storedData = await this._keychain.getToken() || await this._keychain.tryMigrate();
+        const storedData = await this._keychain.getToken();
         if (storedData) {
             try {
                 const sessions = this.parseStoredData(storedData);
@@ -298,9 +296,9 @@ export class MSAService implements IAuthService {
         }
     }
 
-    private getTokenClaims(accessToken: string): ITokenClaims {
+    private getTokenClaims(jwt: string): ITokenClaims {
         try {
-            return JSON.parse(Buffer.from(accessToken.split('.')[1], 'base64').toString());
+            return JSON.parse(Buffer.from(jwt.split('.')[1], 'base64').toString());
         } catch (e) {
             console.error(e.message);
             throw new Error('Unable to read token claims');
@@ -321,9 +319,9 @@ export class MSAService implements IAuthService {
         return Promise.all(matchingTokens.map(token => this.convertToSession(token)));
     }
 
-    public async createSession(): Promise<vscode.AuthenticationSession> {
+    public async createSession(scopes: string[]): Promise<vscode.AuthenticationSession> {
         console.info('Logging in...');
-        return await this.loginWithoutLocalServer();
+        return await this.loginWithoutLocalServer(scopes);
     }
 
     public dispose(): void {
@@ -348,7 +346,7 @@ export class MSAService implements IAuthService {
         }
     }
 
-    private async loginWithoutLocalServer(): Promise<vscode.AuthenticationSession> {
+    private async loginWithoutLocalServer(scopes: string[]): Promise<vscode.AuthenticationSession> {
         const callbackUri = await vscode.env.asExternalUri(vscode.Uri.parse(`${vscode.env.uriScheme}://tylerleonhardt.msft-todo-unofficial`));
         const nonce = randomBytes(16).toString('base64');
         const port = (callbackUri.authority.match(/:([0-9]*)$/) || [])[1] || (callbackUri.scheme === 'https' ? 443 : 80);
@@ -358,8 +356,9 @@ export class MSAService implements IAuthService {
         let uri = vscode.Uri.parse(signInUrl);
         const codeVerifier = toBase64UrlEncoding(randomBytes(32).toString('base64'));
         const codeChallenge = toBase64UrlEncoding(await sha256(codeVerifier));
+        const scopeStr = scopes.join(' ');
         uri = uri.with({
-            query: `response_type=code&client_id=${encodeURIComponent(clientId)}&response_mode=query&redirect_uri=${redirectUrl}&state=${state}&scope=${scope}&prompt=select_account&code_challenge_method=S256&code_challenge=${codeChallenge}`
+            query: `response_type=code&client_id=${encodeURIComponent(clientId)}&response_mode=query&redirect_uri=${redirectUrl}&state=${state}&scope=${scopeStr}&prompt=select_account&code_challenge_method=S256&code_challenge=${codeChallenge}`
         });
         vscode.env.openExternal(uri);
 
@@ -370,28 +369,28 @@ export class MSAService implements IAuthService {
             }, 1000 * 60 * 5);
         });
 
-        const existingStates = this._pendingStates.get(scope) || [];
-        this._pendingStates.set(scope, [...existingStates, state]);
+        const existingStates = this._pendingStates.get(scopeStr) || [];
+        this._pendingStates.set(scopeStr, [...existingStates, state]);
 
         // Register a single listener for the URI callback, in case the user starts the login process multiple times
         // before completing it.
-        let existingPromise = this._codeExchangePromises.get(scope);
+        let existingPromise = this._codeExchangePromises.get(scopeStr);
         if (!existingPromise) {
-            existingPromise = this.handleCodeResponse();
-            this._codeExchangePromises.set(scope, existingPromise);
+            existingPromise = this.handleCodeResponse(scopeStr);
+            this._codeExchangePromises.set(scopeStr, existingPromise);
         }
 
         this._codeVerfifiers.set(state, codeVerifier);
 
         return Promise.race([existingPromise, timeoutPromise])
             .finally(() => {
-                this._pendingStates.delete(scope);
-                this._codeExchangePromises.delete(scope);
+                this._pendingStates.delete(scopeStr);
+                this._codeExchangePromises.delete(scopeStr);
                 this._codeVerfifiers.delete(state);
             });
     }
 
-    private async handleCodeResponse(): Promise<vscode.AuthenticationSession> {
+    private async handleCodeResponse(scopeStr: string): Promise<vscode.AuthenticationSession> {
         let uriEventListener: vscode.Disposable;
         return new Promise((resolve: (value: vscode.AuthenticationSession) => void, reject) => {
             uriEventListener = this._uriHandler.event(async (uri: vscode.Uri) => {
@@ -399,7 +398,7 @@ export class MSAService implements IAuthService {
                     const query = parseQuery(uri);
                     const code = query.code;
 
-                    const acceptedStates = this._pendingStates.get(scope) || [];
+                    const acceptedStates = this._pendingStates.get(scopeStr) || [];
                     // Workaround double encoding issues of state in web
                     if (!acceptedStates.includes(query.state) && !acceptedStates.includes(decodeURIComponent(query.state))) {
                         throw new Error('State does not match.');
@@ -410,8 +409,8 @@ export class MSAService implements IAuthService {
                         throw new Error('No available code verifier');
                     }
 
-                    const token = await this.exchangeCodeForToken(code, verifier);
-                    this.setToken(token, scope);
+                    const token = await this.exchangeCodeForToken(code, verifier, scopeStr);
+                    this.setToken(token, scopeStr);
 
                     const session = await this.convertToSession(token);
                     resolve(session);
@@ -461,29 +460,42 @@ export class MSAService implements IAuthService {
     }
 
     private getTokenFromResponse(json: ITokenResponse, scope: string, existingId?: string): IToken {
-        return {
-            expiresIn: json.expires_in,
-            expiresAt: json.expires_in ? Date.now() + json.expires_in * 1000 : undefined,
-            accessToken: json.access_token,
-            idToken: json.id_token,
-            refreshToken: json.refresh_token,
-            scope,
-            sessionId: uuid(),
-            account: {
-                label: 'user@example.com',
-                id: '1234'
-            }
-        };
-    }
+		let claims = undefined;
 
-    private async exchangeCodeForToken(code: string, codeVerifier: string): Promise<IToken> {
+		try {
+			claims = this.getTokenClaims(json.access_token);
+		} catch (e) {
+			if (json.id_token) {
+				console.log('Failed to fetch token claims from access_token. Attempting to parse id_token instead');
+				claims = this.getTokenClaims(json.id_token);
+			} else {
+				throw e;
+			}
+		}
+
+		return {
+			expiresIn: json.expires_in,
+			expiresAt: json.expires_in ? Date.now() + json.expires_in * 1000 : undefined,
+			accessToken: json.access_token,
+			idToken: json.id_token,
+			refreshToken: json.refresh_token,
+			scope,
+			sessionId: uuid(),
+			account: {
+				label: claims.email || claims.unique_name || claims.preferred_username || 'user@example.com',
+				id: `${claims.tid}/${(claims.oid || (claims.altsecid || '' + claims.ipd || ''))}`
+			}
+		};
+	}
+
+    private async exchangeCodeForToken(code: string, codeVerifier: string, scopeStr: string): Promise<IToken> {
         console.info('Exchanging login code for token');
         try {
             const postData = querystring.stringify({
                 grant_type: 'authorization_code',
-                code: code,
+                code,
                 client_id: clientId,
-                scope: scope,
+                scope: scopeStr,
                 code_verifier: codeVerifier,
                 redirect_uri: redirectUrl
             });
@@ -503,7 +515,7 @@ export class MSAService implements IAuthService {
             if (result.ok) {
                 console.info('Exchanging login code for token success');
                 const json = await result.json();
-                return this.getTokenFromResponse(json, scope);
+                return this.getTokenFromResponse(json, scopeStr);
             } else {
                 console.error('Exchanging login code for token failed');
                 throw new Error('Unable to login.');
