@@ -12,6 +12,7 @@ import { v4 as uuid } from 'uuid';
 import fetch from 'cross-fetch';
 import { Keychain } from './keychain';
 import { createServer, startServer } from './authServer';
+import { sha256 } from './env/node/sha256';
 
 const redirectUrl = 'https://extension-auth-redirect.azurewebsites.net/';
 const loginEndpointUrl = 'https://login.microsoftonline.com/';
@@ -91,10 +92,6 @@ function parseQuery(uri: vscode.Uri) {
         prev[queryString[0]] = queryString[1];
         return prev;
     }, {});
-}
-
-async function sha256(s: string | Uint8Array): Promise<string> {
-    return (require('crypto')).createHash('sha256').update(s).digest('base64');
 }
 
 export const onDidChangeSessions = new vscode.EventEmitter<vscode.AuthenticationProviderAuthenticationSessionsChangeEvent>();
