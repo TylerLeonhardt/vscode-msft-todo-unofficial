@@ -7,8 +7,8 @@
 			"type": "npm",
 			"script": "watch",
 			"problemMatcher": [
-                "$ts-webpack-watch",
-                "$tslint-webpack-watch"
+				"$ts-webpack-watch",
+				"$tslint-webpack-watch"
 			],
 			"isBackground": true,
 			"presentation": {
@@ -28,6 +28,17 @@
 				"reveal": "never"
 			},
 			"group": "build"
+		},
+		{
+			"type": "npm",
+			"script": "watch-web",
+			"problemMatcher": [
+				"$ts-webpack-watch"
+			],
+			"group": "build",
+			"label": "npm: watch-web",
+			"detail": "webpack --watch --config ./build/web-extension.webpack.config.js",
+			"isBackground": true
 		}
 	]
 }
