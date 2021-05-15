@@ -9,7 +9,7 @@ import { Buffer } from 'buffer';
 import * as vscode from 'vscode';
 
 import { v4 as uuid } from 'uuid';
-import * as fetch from 'isomorphic-fetch';
+import fetch from 'cross-fetch';
 import { Keychain } from './keychain';
 import { createServer, startServer } from './authServer';
 

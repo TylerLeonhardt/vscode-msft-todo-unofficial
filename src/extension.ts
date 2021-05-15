@@ -4,7 +4,7 @@ import { MicrosoftToDoTreeDataProvider } from './todoProviders/microsoftToDoTree
 import { TaskDetailsViewProvider } from './views/taskDetailsView';
 import { TaskOperations } from './commands/taskOperations';
 import { ListOperations } from './commands/listOperations';
-import 'isomorphic-fetch';
+import 'cross-fetch/polyfill';
 import { MsaAuthProvider } from './clientFactories/MsaAuthProvider';
 
 export async function activate(context: vscode.ExtensionContext) {

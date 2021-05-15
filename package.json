@@ -23,7 +23,7 @@
 		"onCommand:microsoft-todo-unoffcial.createTask",
 		"onCommand:microsoft-todo-unoffcial.createList"
 	],
-	"main": "./out/extension.js",
+	"main": "./dist/extension.js",
 	"contributes": {
 		"commands": [
 			{
@@ -136,8 +136,7 @@
 				"icon": "$(close)"
 			}
 		],
-		"keybindings": [
-		],
+		"keybindings": [],
 		"viewsContainers": {
 			"activitybar": [
 				{
@@ -174,7 +173,7 @@
 		"menus": {
 			"commandPalette": [
 				{
-					"COMMANDS THAT SHOULD NOT SHOW UP IN THE COMMAND PALETTE":"",
+					"COMMANDS THAT SHOULD NOT SHOW UP IN THE COMMAND PALETTE": "",
 					"command": "microsoft-todo-unoffcial.deleteList",
 					"when": "false"
 				},
@@ -291,17 +290,19 @@
 		}
 	},
 	"scripts": {
-		"vscode:prepublish": "yarn run compile",
-		"compile": "tsc -p ./",
-		"watch": "tsc -watch -p ./",
-		"pretest": "yarn run compile && yarn run lint",
+		"vscode:prepublish": "yarn run package",
+		"compile": "webpack",
+		"watch": "webpack --watch",
+		"package": "webpack --mode production --devtool hidden-source-map",
+		"test-compile": "tsc -p ./",
+		"test-watch": "tsc -watch -p ./",
+		"pretest": "yarn run test-compile && yarn run lint",
 		"lint": "eslint src --ext ts",
 		"test": "node ./out/test/runTest.js"
 	},
 	"devDependencies": {
 		"@microsoft/microsoft-graph-types": "^1.28.0",
 		"@types/glob": "^7.1.3",
-		"@types/isomorphic-fetch": "^0.0.35",
 		"@types/mocha": "^8.0.4",
 		"@types/node": "^12.11.7",
 		"@types/randombytes": "^2.0.0",
@@ -313,17 +314,19 @@
 		"glob": "^7.1.6",
 		"mocha": "^8.1.3",
 		"typescript": "^4.1.2",
-		"vscode-test": "^1.4.1"
+		"vscode-test": "^1.4.1",
+		"ts-loader": "^8.0.14",
+		"webpack": "^5.19.0",
+		"webpack-cli": "^4.4.0"
 	},
 	"dependencies": {
 		"@microsoft/microsoft-graph-client": "^2.2.1",
-		"isomorphic-fetch": "^3.0.0",
+		"cross-fetch": "^3.1.4",
 		"moment": "^2.29.1",
 		"moment-timezone": "^0.5.33",
-		"tiny-date-picker": "^3.2.8",
-		"keytar": "^7.6.0",
 		"querystring": "^0.2.1",
 		"randombytes": "^2.1.0",
+		"tiny-date-picker": "^3.2.8",
 		"uuid": "^8.3.2"
 	}
 }
