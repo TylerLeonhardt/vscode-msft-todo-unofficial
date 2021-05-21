@@ -339,5 +339,5 @@
     "tiny-date-picker": "^3.2.8",
     "uuid": "^8.3.2"
   },
-  "browser": "./dist/extension.js"
+  "browser": "./dist/web/extension.js"
 }
