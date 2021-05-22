@@ -611,9 +611,11 @@ export class MSAService {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',
-                    'Content-Length': postData.length.toString()
+                    'Content-Length': postData.length.toString(),
+                    'Origin': 'https://vscode.dev/'
                 },
-                body: postData
+                body: postData,
+                mode: 'cors'
             });
         } catch (e) {
             console.error('Refreshing token failed');
