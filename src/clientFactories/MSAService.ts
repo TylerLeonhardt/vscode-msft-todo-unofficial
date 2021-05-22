@@ -407,6 +407,8 @@ export class MSAService {
                 return 'vsoppe,';
             case 'online.dev.core.vsengsaas.visualstudio.com':
                 return 'vsodev,';
+            case 'vscode.dev':
+                return 'vscode.dev,';
             default:
                 return `${callbackUri.scheme},`;
         }
