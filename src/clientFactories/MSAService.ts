@@ -575,7 +575,8 @@ export class MSAService {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',
-                    'Content-Length': postData.length.toString()
+                    'Content-Length': postData.length.toString(),
+                    'Origin': 'vscode.dev'
                 },
                 body: postData
             });
