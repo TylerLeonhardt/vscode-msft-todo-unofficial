@@ -584,7 +584,7 @@ export class MSAService {
                 return this.getTokenFromResponse(json, scopeStr);
             } else {
                 console.error('Exchanging login code for token failed');
-                throw new Error('Unable to login.');
+                throw new Error(`Unable to login: ${await result.text()}`);
             }
         } catch (e) {
             console.error(e.message);
