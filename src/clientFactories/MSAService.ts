@@ -414,6 +414,7 @@ export class MSAService {
 
     private async loginWithoutLocalServer(scopes: string[]): Promise<vscode.AuthenticationSession> {
         const callbackUri = await vscode.env.asExternalUri(vscode.Uri.parse(`${vscode.env.uriScheme}://tylerleonhardt.msft-todo-unofficial`));
+        console.log(callbackUri.toString());
         const nonce = randomBytes(16).toString('base64');
         const port = (callbackUri.authority.match(/:([0-9]*)$/) || [])[1] || (callbackUri.scheme === 'https' ? 443 : 80);
         const callbackEnvironment = this.getCallbackEnvironment(callbackUri);
