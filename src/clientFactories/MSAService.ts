@@ -399,21 +399,21 @@ export class MSAService {
     }
 
     private getCallbackEnvironment(callbackUri: vscode.Uri): string {
-        if (callbackUri.authority.endsWith('.workspaces.github.com') || callbackUri.authority.endsWith('.github.dev')) {
-            return `${callbackUri.authority},`;
-        }
+		if (callbackUri.scheme !== 'https' && callbackUri.scheme !== 'http') {
+			return callbackUri.scheme;
+		}
 
-        switch (callbackUri.authority) {
-            case 'online.visualstudio.com':
-                return 'vso,';
-            case 'online-ppe.core.vsengsaas.visualstudio.com':
-                return 'vsoppe,';
-            case 'online.dev.core.vsengsaas.visualstudio.com':
-                return 'vsodev,';
-            default:
-                return `${callbackUri.scheme},`;
-        }
-    }
+		switch (callbackUri.authority) {
+			case 'online.visualstudio.com':
+				return 'vso';
+			case 'online-ppe.core.vsengsaas.visualstudio.com':
+				return 'vsoppe';
+			case 'online.dev.core.vsengsaas.visualstudio.com':
+				return 'vsodev';
+			default:
+				return callbackUri.authority;
+		}
+	}
 
     private async loginWithoutLocalServer(scopes: string[]): Promise<vscode.AuthenticationSession> {
         const callbackUri = await vscode.env.asExternalUri(vscode.Uri.parse(`${vscode.env.uriScheme}://tylerleonhardt.msft-todo-unofficial`));

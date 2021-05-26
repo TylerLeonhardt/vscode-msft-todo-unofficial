@@ -10,7 +10,6 @@ export class MsaAuthProvider implements vscode.AuthenticationProvider {
 
     constructor(context: vscode.ExtensionContext) {
         this.msaService = new MSAService(context);
-        this.msaService.initialize();
     }
 
     initialize(): Thenable<void> {
