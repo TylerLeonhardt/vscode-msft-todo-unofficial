@@ -567,7 +567,7 @@ export class MSAService {
             });
 
             const proxyEndpoints: { [providerId: string]: string } | undefined = await vscode.commands.executeCommand('workbench.getCodeExchangeProxyEndpoints');
-            const endpoint = proxyEndpoints && proxyEndpoints['microsoft'] || `${loginEndpointUrl}${tenant}/oauth2/v2.0/token`;
+            const endpoint = proxyEndpoints && proxyEndpoints['microsoftCommon'] || `${loginEndpointUrl}${tenant}/oauth2/v2.0/token`;
 
             const result = await fetch(endpoint, {
                 method: 'POST',
