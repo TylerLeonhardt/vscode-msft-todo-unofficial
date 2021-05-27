@@ -417,7 +417,7 @@ export class MSAService {
         const nonce = randomBytes(16).toString('base64');
         const port = (callbackUri.authority.match(/:([0-9]*)$/) || [])[1] || (callbackUri.scheme === 'https' ? 443 : 80);
         const callbackEnvironment = this.getCallbackEnvironment(callbackUri);
-        const state = `${callbackEnvironment}${port},${encodeURIComponent(nonce)},${encodeURIComponent(callbackUri.query)}`;
+        const state = `${callbackEnvironment},${port},${encodeURIComponent(nonce)},${encodeURIComponent(callbackUri.query)}`;
         const signInUrl = `${loginEndpointUrl}${tenant}/oauth2/v2.0/authorize`;
         let uri = vscode.Uri.parse(signInUrl);
         const codeVerifier = toBase64UrlEncoding(randomBytes(32).toString('base64'));
