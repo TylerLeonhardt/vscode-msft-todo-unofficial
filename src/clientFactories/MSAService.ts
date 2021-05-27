@@ -603,7 +603,9 @@ export class MSAService {
 
         let result: Response;
         try {
-            result = await fetch(`https://login.microsoftonline.com/${tenant}/oauth2/v2.0/token`, {
+            const proxyEndpoints: { [providerId: string]: string } | undefined = await vscode.commands.executeCommand('workbench.getCodeExchangeProxyEndpoints');
+            const endpoint = proxyEndpoints && proxyEndpoints['microsoftCommon'] || `${loginEndpointUrl}${tenant}/oauth2/v2.0/token`;
+            result = await fetch(endpoint, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',
