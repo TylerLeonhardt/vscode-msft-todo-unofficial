@@ -8,6 +8,7 @@ import 'cross-fetch/polyfill';
 import { MsaAuthProvider } from './clientFactories/MsaAuthProvider';
 
 export async function activate(context: vscode.ExtensionContext) {
+	console.log('Activating!');
 	const auth = new MsaAuthProvider(context);
 	await auth.initialize();
 	vscode.authentication.registerAuthenticationProvider(MsaAuthProvider.id, 'Microsoft Account (MSA)', auth, {

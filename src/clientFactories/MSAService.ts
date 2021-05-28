@@ -12,9 +12,10 @@ import { v4 as uuid } from 'uuid';
 import fetch from 'cross-fetch';
 import { Keychain } from './keychain';
 import { createServer, startServer } from './authServer';
+import { sha256 } from './env/node/sha256';
 
 const redirectUrl = 'https://extension-auth-redirect.azurewebsites.net/';
-const loginEndpointUrl = 'https://login.microsoftonline.com/';
+const defaultLoginEndpointUrl = 'https://login.microsoftonline.com/';
 const clientId = 'a4fd7674-4ebd-4dbc-831c-338314dd459e';
 const tenant = 'common';
 
@@ -91,10 +92,6 @@ function parseQuery(uri: vscode.Uri) {
         prev[queryString[0]] = queryString[1];
         return prev;
     }, {});
-}
-
-async function sha256(s: string | Uint8Array): Promise<string> {
-    return (require('crypto')).createHash('sha256').update(s).digest('base64');
 }
 
 export const onDidChangeSessions = new vscode.EventEmitter<vscode.AuthenticationProviderAuthenticationSessionsChangeEvent>();
@@ -353,7 +350,7 @@ export class MSAService {
 
             const codeVerifier = toBase64UrlEncoding(randomBytes(32).toString('base64'));
             const codeChallenge = toBase64UrlEncoding(await sha256(codeVerifier));
-            const loginUrl = `${loginEndpointUrl}${tenant}/oauth2/v2.0/authorize?response_type=code&response_mode=query&client_id=${encodeURIComponent(clientId)}&redirect_uri=${encodeURIComponent(redirectUrl)}&state=${state}&scope=${encodeURIComponent(scopeStr)}&prompt=select_account&code_challenge_method=S256&code_challenge=${codeChallenge}`;
+            const loginUrl = `${defaultLoginEndpointUrl}${tenant}/oauth2/v2.0/authorize?response_type=code&response_mode=query&client_id=${encodeURIComponent(clientId)}&redirect_uri=${encodeURIComponent(redirectUrl)}&state=${state}&scope=${encodeURIComponent(scopeStr)}&prompt=select_account&code_challenge_method=S256&code_challenge=${codeChallenge}`;
 
             await redirectReq.res.writeHead(302, { Location: loginUrl });
             redirectReq.res.end();
@@ -420,8 +417,8 @@ export class MSAService {
         const nonce = randomBytes(16).toString('base64');
         const port = (callbackUri.authority.match(/:([0-9]*)$/) || [])[1] || (callbackUri.scheme === 'https' ? 443 : 80);
         const callbackEnvironment = this.getCallbackEnvironment(callbackUri);
-        const state = `${callbackEnvironment}${port},${encodeURIComponent(nonce)},${encodeURIComponent(callbackUri.query)}`;
-        const signInUrl = `${loginEndpointUrl}${tenant}/oauth2/v2.0/authorize`;
+        const state = `${callbackEnvironment},${port},${encodeURIComponent(nonce)},${encodeURIComponent(callbackUri.query)}`;
+        const signInUrl = `${defaultLoginEndpointUrl}${tenant}/oauth2/v2.0/authorize`;
         let uri = vscode.Uri.parse(signInUrl);
         const codeVerifier = toBase64UrlEncoding(randomBytes(32).toString('base64'));
         const codeChallenge = toBase64UrlEncoding(await sha256(codeVerifier));
@@ -570,9 +567,9 @@ export class MSAService {
             });
 
             const proxyEndpoints: { [providerId: string]: string } | undefined = await vscode.commands.executeCommand('workbench.getCodeExchangeProxyEndpoints');
-            const endpoint = proxyEndpoints && proxyEndpoints['microsoft'] || `${loginEndpointUrl}${tenant}/oauth2/v2.0/token`;
 
-            const result = await fetch(endpoint, {
+            const endpoint = proxyEndpoints && proxyEndpoints['microsoft'] || defaultLoginEndpointUrl;
+            const result = await fetch(`${endpoint}${tenant}/oauth2/v2.0/token`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',
@@ -587,7 +584,7 @@ export class MSAService {
                 return this.getTokenFromResponse(json, scopeStr);
             } else {
                 console.error('Exchanging login code for token failed');
-                throw new Error('Unable to login.');
+                throw new Error(`Unable to login: ${await result.text()}`);
             }
         } catch (e) {
             console.error(e.message);
@@ -606,7 +603,9 @@ export class MSAService {
 
         let result: Response;
         try {
-            result = await fetch(`https://login.microsoftonline.com/${tenant}/oauth2/v2.0/token`, {
+            const proxyEndpoints: { [providerId: string]: string } | undefined = await vscode.commands.executeCommand('workbench.getCodeExchangeProxyEndpoints');
+            const endpoint = proxyEndpoints && proxyEndpoints['microsoft'] || defaultLoginEndpointUrl;
+            result = await fetch(`${endpoint}${tenant}/oauth2/v2.0/token`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',

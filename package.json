@@ -1,332 +1,343 @@
 {
-	"name": "msft-todo-unofficial",
-	"displayName": "Microsoft To Do (Unofficial)",
-	"publisher": "tylerleonhardt",
-	"description": "Interact with Microsoft To Do right in VS Code!",
-	"version": "0.0.7",
-	"icon": "resources/icon.png",
-	"repository": {
-		"url": "https://github.com/TylerLeonhardt/vscode-msft-todo-official"
-	},
-	"engines": {
-		"vscode": "^1.55.0"
-	},
-	"categories": [
-		"Other"
-	],
-	"activationEvents": [
-		"onView:microsoft-todo-unoffcial.listView",
-		"onCommand:microsoft-todo-unoffcial.login",
-		"onCommand:microsoft-todo-unoffcial.refreshList",
-		"onCommand:microsoft-todo-unoffcial.starFilter",
-		"onCommand:microsoft-todo-unoffcial.unstarFilter",
-		"onCommand:microsoft-todo-unoffcial.createTask",
-		"onCommand:microsoft-todo-unoffcial.createList"
-	],
-	"main": "./dist/extension.js",
-	"contributes": {
-		"commands": [
-			{
-				"command": "microsoft-todo-unoffcial.login",
-				"title": "Login",
-				"category": "Microsoft To Do (Unofficial)"
-			},
-			{
-				"command": "microsoft-todo-unoffcial.refreshList",
-				"title": "Refresh",
-				"category": "Microsoft To Do (Unofficial)",
-				"icon": {
-					"dark": "./resources/dark/refresh.svg",
-					"light": "./resources/light/refresh.svg"
-				}
-			},
-			{
-				"command": "microsoft-todo-unoffcial.complete",
-				"title": "Complete task",
-				"icon": {
-					"dark": "./resources/dark/check.svg",
-					"light": "./resources/light/check.svg"
-				}
-			},
-			{
-				"command": "microsoft-todo-unoffcial.uncomplete",
-				"title": "Uncomplete task",
-				"icon": {
-					"dark": "./resources/dark/check.svg",
-					"light": "./resources/light/check.svg"
-				}
-			},
-			{
-				"command": "microsoft-todo-unoffcial.star",
-				"title": "Star task",
-				"icon": {
-					"dark": "./resources/dark/star-empty.svg",
-					"light": "./resources/light/star-empty.svg"
-				}
-			},
-			{
-				"command": "microsoft-todo-unoffcial.unstar",
-				"title": "Unstar task",
-				"icon": {
-					"dark": "./resources/dark/star-full.svg",
-					"light": "./resources/light/star-full.svg"
-				}
-			},
-			{
-				"command": "microsoft-todo-unoffcial.starFilter",
-				"title": "Only show starred tasks",
-				"category": "Microsoft To Do (Unofficial)",
-				"icon": {
-					"dark": "./resources/dark/star-empty.svg",
-					"light": "./resources/light/star-empty.svg"
-				}
-			},
-			{
-				"command": "microsoft-todo-unoffcial.unstarFilter",
-				"title": "Show all tasks",
-				"category": "Microsoft To Do (Unofficial)",
-				"icon": {
-					"dark": "./resources/dark/star-full.svg",
-					"light": "./resources/light/star-full.svg"
-				}
-			},
-			{
-				"command": "microsoft-todo-unoffcial.createTask",
-				"title": "Create tasks",
-				"category": "Microsoft To Do (Unofficial)",
-				"icon": {
-					"dark": "./resources/dark/add.svg",
-					"light": "./resources/light/add.svg"
-				}
-			},
-			{
-				"command": "microsoft-todo-unoffcial.deleteTask",
-				"title": "Delete task",
-				"icon": {
-					"dark": "./resources/dark/trash.svg",
-					"light": "./resources/light/trash.svg"
-				}
-			},
-			{
-				"command": "microsoft-todo-unoffcial.createList",
-				"title": "Create a list",
-				"category": "Microsoft To Do (Unofficial)",
-				"icon": {
-					"dark": "./resources/dark/add.svg",
-					"light": "./resources/light/add.svg"
-				}
-			},
-			{
-				"command": "microsoft-todo-unoffcial.deleteList",
-				"title": "Delete list",
-				"icon": {
-					"dark": "./resources/dark/trash.svg",
-					"light": "./resources/light/trash.svg"
-				}
-			},
-			{
-				"command": "microsoft-todo-unoffcial.showTaskDetailsView",
-				"title": "Show task details view",
-				"category": "Microsoft To Do (Unofficial)"
-			},
-			{
-				"command": "microsoft-todo-unoffcial.hideTaskDetailsView",
-				"title": "Hide task details view",
-				"category": "Microsoft To Do (Unofficial)",
-				"icon": "$(close)"
-			}
-		],
-		"keybindings": [],
-		"viewsContainers": {
-			"activitybar": [
-				{
-					"id": "microsoft-todo-unoffcial",
-					"title": "Microsoft To Do (Unofficial)",
-					"icon": "./resources/dark/checklist.svg"
-				}
-			]
-		},
-		"views": {
-			"microsoft-todo-unoffcial": [
-				{
-					"id": "microsoft-todo-unoffcial.listView",
-					"name": "Microsoft To Do",
-					"type": "tree",
-					"visibility": "visible"
-				},
-				{
-					"id": "microsoft-todo-unoffcial.taskDetailsView",
-					"name": "Task details",
-					"type": "webview",
-					"visibility": "hidden",
-					"when": "showTaskDetailsView",
-					"contextualTitle": "To Do Task details"
-				}
-			]
-		},
-		"viewsWelcome": [
-			{
-				"view": "microsoft-todo-unoffcial.listView",
-				"contents": "Login to see your Microsoft To Do lists.\n[Login](command:microsoft-todo-unoffcial.login)"
-			}
-		],
-		"menus": {
-			"commandPalette": [
-				{
-					"COMMANDS THAT SHOULD NOT SHOW UP IN THE COMMAND PALETTE": "",
-					"command": "microsoft-todo-unoffcial.deleteList",
-					"when": "false"
-				},
-				{
-					"command": "microsoft-todo-unoffcial.deleteTask",
-					"when": "false"
-				},
-				{
-					"command": "microsoft-todo-unoffcial.star",
-					"when": "false"
-				},
-				{
-					"command": "microsoft-todo-unoffcial.unstar",
-					"when": "false"
-				},
-				{
-					"command": "microsoft-todo-unoffcial.complete",
-					"when": "false"
-				},
-				{
-					"command": "microsoft-todo-unoffcial.uncomplete",
-					"when": "false"
-				}
-			],
-			"view/item/context": [
-				{
-					"command": "microsoft-todo-unoffcial.refreshList",
-					"when": "viewItem == list",
-					"group": "inline@200"
-				},
-				{
-					"command": "microsoft-todo-unoffcial.createTask",
-					"when": "viewItem == list",
-					"group": "inline@100"
-				},
-				{
-					"command": "microsoft-todo-unoffcial.complete",
-					"when": "viewItem =~ /task-notcompleted/",
-					"group": "inline"
-				},
-				{
-					"command": "microsoft-todo-unoffcial.uncomplete",
-					"when": "viewItem =~ /task-completed/",
-					"group": "inline"
-				},
-				{
-					"command": "microsoft-todo-unoffcial.complete",
-					"when": "viewItem =~ /task-notcompleted/",
-					"group": "z_commands@100"
-				},
-				{
-					"command": "microsoft-todo-unoffcial.uncomplete",
-					"when": "viewItem =~ /task-completed/",
-					"group": "z_commands@100"
-				},
-				{
-					"command": "microsoft-todo-unoffcial.star",
-					"when": "viewItem =~ /task-notstarred/",
-					"group": "inline"
-				},
-				{
-					"command": "microsoft-todo-unoffcial.unstar",
-					"when": "viewItem =~ /task-starred/",
-					"group": "inline"
-				},
-				{
-					"command": "microsoft-todo-unoffcial.star",
-					"when": "viewItem =~ /task-notstarred/",
-					"group": "z_commands@200"
-				},
-				{
-					"command": "microsoft-todo-unoffcial.unstar",
-					"when": "viewItem =~ /task-starred/",
-					"group": "z_commands@200"
-				},
-				{
-					"command": "microsoft-todo-unoffcial.deleteTask",
-					"when": "viewItem =~ /task/",
-					"group": "z_commands@300"
-				},
-				{
-					"command": "microsoft-todo-unoffcial.deleteList",
-					"when": "viewItem == list",
-					"group": "z_commands@200"
-				}
-			],
-			"view/title": [
-				{
-					"command": "microsoft-todo-unoffcial.refreshList",
-					"when": "view == microsoft-todo-unoffcial.listView",
-					"group": "navigation@2"
-				},
-				{
-					"command": "microsoft-todo-unoffcial.createTask",
-					"when": "view == microsoft-todo-unoffcial.listView",
-					"group": "navigation@1"
-				},
-				{
-					"command": "microsoft-todo-unoffcial.starFilter",
-					"when": "view == microsoft-todo-unoffcial.listView && !starFilter",
-					"group": "navigation@3"
-				},
-				{
-					"command": "microsoft-todo-unoffcial.unstarFilter",
-					"when": "view == microsoft-todo-unoffcial.listView && starFilter",
-					"group": "navigation@3"
-				},
-				{
-					"command": "microsoft-todo-unoffcial.hideTaskDetailsView",
-					"when": "view == microsoft-todo-unoffcial.taskDetailsView",
-					"group": "navigation@1"
-				}
-			]
-		}
-	},
-	"scripts": {
-		"vscode:prepublish": "yarn run package",
-		"compile": "webpack",
-		"watch": "webpack --watch",
-		"package": "webpack --mode production --devtool hidden-source-map",
-		"test-compile": "tsc -p ./",
-		"test-watch": "tsc -watch -p ./",
-		"pretest": "yarn run test-compile && yarn run lint",
-		"lint": "eslint src --ext ts",
-		"test": "node ./out/test/runTest.js"
-	},
-	"devDependencies": {
-		"@microsoft/microsoft-graph-types": "^1.28.0",
-		"@types/glob": "^7.1.3",
-		"@types/mocha": "^8.0.4",
-		"@types/node": "^12.11.7",
-		"@types/randombytes": "^2.0.0",
-		"@types/uuid": "8.3.0",
-		"@types/vscode": "^1.55.0",
-		"@typescript-eslint/eslint-plugin": "^4.9.0",
-		"@typescript-eslint/parser": "^4.9.0",
-		"eslint": "^7.15.0",
-		"glob": "^7.1.6",
-		"mocha": "^8.1.3",
-		"ts-loader": "^8.0.14",
-		"typescript": "^4.1.2",
-		"vscode-test": "^1.4.1",
-		"webpack": "^5.19.0",
-		"webpack-cli": "^4.7.0"
-	},
-	"dependencies": {
-		"@microsoft/microsoft-graph-client": "^2.2.1",
-		"cross-fetch": "^3.1.4",
-		"moment": "^2.29.1",
-		"moment-timezone": "^0.5.33",
-		"querystring": "^0.2.1",
-		"randombytes": "^2.1.0",
-		"tiny-date-picker": "^3.2.8",
-		"uuid": "^8.3.2"
-	}
+  "name": "msft-todo-unofficial",
+  "displayName": "Microsoft To Do (Unofficial)",
+  "publisher": "tylerleonhardt",
+  "description": "Interact with Microsoft To Do right in VS Code!",
+  "version": "0.0.7",
+  "icon": "resources/icon.png",
+  "repository": {
+    "url": "https://github.com/TylerLeonhardt/vscode-msft-todo-official"
+  },
+  "engines": {
+    "vscode": "^1.55.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onView:microsoft-todo-unoffcial.listView",
+    "onCommand:microsoft-todo-unoffcial.login",
+    "onCommand:microsoft-todo-unoffcial.refreshList",
+    "onCommand:microsoft-todo-unoffcial.starFilter",
+    "onCommand:microsoft-todo-unoffcial.unstarFilter",
+    "onCommand:microsoft-todo-unoffcial.createTask",
+    "onCommand:microsoft-todo-unoffcial.createList"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "microsoft-todo-unoffcial.login",
+        "title": "Login",
+        "category": "Microsoft To Do (Unofficial)"
+      },
+      {
+        "command": "microsoft-todo-unoffcial.refreshList",
+        "title": "Refresh",
+        "category": "Microsoft To Do (Unofficial)",
+        "icon": {
+          "dark": "./resources/dark/refresh.svg",
+          "light": "./resources/light/refresh.svg"
+        }
+      },
+      {
+        "command": "microsoft-todo-unoffcial.complete",
+        "title": "Complete task",
+        "icon": {
+          "dark": "./resources/dark/check.svg",
+          "light": "./resources/light/check.svg"
+        }
+      },
+      {
+        "command": "microsoft-todo-unoffcial.uncomplete",
+        "title": "Uncomplete task",
+        "icon": {
+          "dark": "./resources/dark/check.svg",
+          "light": "./resources/light/check.svg"
+        }
+      },
+      {
+        "command": "microsoft-todo-unoffcial.star",
+        "title": "Star task",
+        "icon": {
+          "dark": "./resources/dark/star-empty.svg",
+          "light": "./resources/light/star-empty.svg"
+        }
+      },
+      {
+        "command": "microsoft-todo-unoffcial.unstar",
+        "title": "Unstar task",
+        "icon": {
+          "dark": "./resources/dark/star-full.svg",
+          "light": "./resources/light/star-full.svg"
+        }
+      },
+      {
+        "command": "microsoft-todo-unoffcial.starFilter",
+        "title": "Only show starred tasks",
+        "category": "Microsoft To Do (Unofficial)",
+        "icon": {
+          "dark": "./resources/dark/star-empty.svg",
+          "light": "./resources/light/star-empty.svg"
+        }
+      },
+      {
+        "command": "microsoft-todo-unoffcial.unstarFilter",
+        "title": "Show all tasks",
+        "category": "Microsoft To Do (Unofficial)",
+        "icon": {
+          "dark": "./resources/dark/star-full.svg",
+          "light": "./resources/light/star-full.svg"
+        }
+      },
+      {
+        "command": "microsoft-todo-unoffcial.createTask",
+        "title": "Create tasks",
+        "category": "Microsoft To Do (Unofficial)",
+        "icon": {
+          "dark": "./resources/dark/add.svg",
+          "light": "./resources/light/add.svg"
+        }
+      },
+      {
+        "command": "microsoft-todo-unoffcial.deleteTask",
+        "title": "Delete task",
+        "icon": {
+          "dark": "./resources/dark/trash.svg",
+          "light": "./resources/light/trash.svg"
+        }
+      },
+      {
+        "command": "microsoft-todo-unoffcial.createList",
+        "title": "Create a list",
+        "category": "Microsoft To Do (Unofficial)",
+        "icon": {
+          "dark": "./resources/dark/add.svg",
+          "light": "./resources/light/add.svg"
+        }
+      },
+      {
+        "command": "microsoft-todo-unoffcial.deleteList",
+        "title": "Delete list",
+        "icon": {
+          "dark": "./resources/dark/trash.svg",
+          "light": "./resources/light/trash.svg"
+        }
+      },
+      {
+        "command": "microsoft-todo-unoffcial.showTaskDetailsView",
+        "title": "Show task details view",
+        "category": "Microsoft To Do (Unofficial)"
+      },
+      {
+        "command": "microsoft-todo-unoffcial.hideTaskDetailsView",
+        "title": "Hide task details view",
+        "category": "Microsoft To Do (Unofficial)",
+        "icon": "$(close)"
+      }
+    ],
+    "keybindings": [],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "microsoft-todo-unoffcial",
+          "title": "Microsoft To Do (Unofficial)",
+          "icon": "./resources/dark/checklist.svg"
+        }
+      ]
+    },
+    "views": {
+      "microsoft-todo-unoffcial": [
+        {
+          "id": "microsoft-todo-unoffcial.listView",
+          "name": "Microsoft To Do",
+          "type": "tree",
+          "visibility": "visible"
+        },
+        {
+          "id": "microsoft-todo-unoffcial.taskDetailsView",
+          "name": "Task details",
+          "type": "webview",
+          "visibility": "hidden",
+          "when": "showTaskDetailsView",
+          "contextualTitle": "To Do Task details"
+        }
+      ]
+    },
+    "viewsWelcome": [
+      {
+        "view": "microsoft-todo-unoffcial.listView",
+        "contents": "Login to see your Microsoft To Do lists.\n[Login](command:microsoft-todo-unoffcial.login)"
+      }
+    ],
+    "menus": {
+      "commandPalette": [
+        {
+          "COMMANDS THAT SHOULD NOT SHOW UP IN THE COMMAND PALETTE": "",
+          "command": "microsoft-todo-unoffcial.deleteList",
+          "when": "false"
+        },
+        {
+          "command": "microsoft-todo-unoffcial.deleteTask",
+          "when": "false"
+        },
+        {
+          "command": "microsoft-todo-unoffcial.star",
+          "when": "false"
+        },
+        {
+          "command": "microsoft-todo-unoffcial.unstar",
+          "when": "false"
+        },
+        {
+          "command": "microsoft-todo-unoffcial.complete",
+          "when": "false"
+        },
+        {
+          "command": "microsoft-todo-unoffcial.uncomplete",
+          "when": "false"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "microsoft-todo-unoffcial.refreshList",
+          "when": "viewItem == list",
+          "group": "inline@200"
+        },
+        {
+          "command": "microsoft-todo-unoffcial.createTask",
+          "when": "viewItem == list",
+          "group": "inline@100"
+        },
+        {
+          "command": "microsoft-todo-unoffcial.complete",
+          "when": "viewItem =~ /task-notcompleted/",
+          "group": "inline"
+        },
+        {
+          "command": "microsoft-todo-unoffcial.uncomplete",
+          "when": "viewItem =~ /task-completed/",
+          "group": "inline"
+        },
+        {
+          "command": "microsoft-todo-unoffcial.complete",
+          "when": "viewItem =~ /task-notcompleted/",
+          "group": "z_commands@100"
+        },
+        {
+          "command": "microsoft-todo-unoffcial.uncomplete",
+          "when": "viewItem =~ /task-completed/",
+          "group": "z_commands@100"
+        },
+        {
+          "command": "microsoft-todo-unoffcial.star",
+          "when": "viewItem =~ /task-notstarred/",
+          "group": "inline"
+        },
+        {
+          "command": "microsoft-todo-unoffcial.unstar",
+          "when": "viewItem =~ /task-starred/",
+          "group": "inline"
+        },
+        {
+          "command": "microsoft-todo-unoffcial.star",
+          "when": "viewItem =~ /task-notstarred/",
+          "group": "z_commands@200"
+        },
+        {
+          "command": "microsoft-todo-unoffcial.unstar",
+          "when": "viewItem =~ /task-starred/",
+          "group": "z_commands@200"
+        },
+        {
+          "command": "microsoft-todo-unoffcial.deleteTask",
+          "when": "viewItem =~ /task/",
+          "group": "z_commands@300"
+        },
+        {
+          "command": "microsoft-todo-unoffcial.deleteList",
+          "when": "viewItem == list",
+          "group": "z_commands@200"
+        }
+      ],
+      "view/title": [
+        {
+          "command": "microsoft-todo-unoffcial.refreshList",
+          "when": "view == microsoft-todo-unoffcial.listView",
+          "group": "navigation@2"
+        },
+        {
+          "command": "microsoft-todo-unoffcial.createTask",
+          "when": "view == microsoft-todo-unoffcial.listView",
+          "group": "navigation@1"
+        },
+        {
+          "command": "microsoft-todo-unoffcial.starFilter",
+          "when": "view == microsoft-todo-unoffcial.listView && !starFilter",
+          "group": "navigation@3"
+        },
+        {
+          "command": "microsoft-todo-unoffcial.unstarFilter",
+          "when": "view == microsoft-todo-unoffcial.listView && starFilter",
+          "group": "navigation@3"
+        },
+        {
+          "command": "microsoft-todo-unoffcial.hideTaskDetailsView",
+          "when": "view == microsoft-todo-unoffcial.taskDetailsView",
+          "group": "navigation@1"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "yarn run package",
+    "compile": "webpack",
+    "watch": "webpack --watch",
+    "package": "webpack --mode production --devtool hidden-source-map",
+    "test-compile": "tsc -p ./",
+    "test-watch": "tsc -watch -p ./",
+    "pretest": "yarn run test-compile && yarn run lint",
+    "lint": "eslint src --ext ts",
+    "test": "node ./out/test/runTest.js",
+    "test-web": "node ./dist/web/test/runTest.js",
+    "pretest-web": "npm run compile-web && tsc ./src/web/test/runTest.ts --outDir ./dist --rootDir ./src --target es6 --module commonjs",
+    "compile-web": "webpack --config ./web-extension.webpack.config.js",
+    "watch-web": "webpack --watch --config ./web-extension.webpack.config.js",
+    "package-web": "webpack --mode production --devtool hidden-source-map --config ./web-extension.webpack.config.js"
+  },
+  "devDependencies": {
+    "@microsoft/microsoft-graph-types": "^1.28.0",
+    "@types/glob": "^7.1.3",
+    "@types/mocha": "^8.0.4",
+    "@types/node": "^12.11.7",
+    "@types/randombytes": "^2.0.0",
+    "@types/uuid": "8.3.0",
+    "@types/vscode": "^1.55.0",
+    "@types/webpack-env": "^1.16.0",
+    "@typescript-eslint/eslint-plugin": "^4.9.0",
+    "@typescript-eslint/parser": "^4.9.0",
+    "assert": "^2.0.0",
+    "eslint": "^7.15.0",
+    "glob": "^7.1.6",
+    "mocha": "^8.1.3",
+    "process": "^0.11.10",
+    "ts-loader": "^8.0.14",
+    "typescript": "^4.1.2",
+    "vscode-test": "^1.4.1",
+    "webpack": "^5.19.0",
+    "webpack-cli": "^4.7.0"
+  },
+  "dependencies": {
+    "@microsoft/microsoft-graph-client": "^2.2.1",
+    "buffer": "^6.0.3",
+    "cross-fetch": "^3.1.4",
+    "moment": "^2.29.1",
+    "moment-timezone": "^0.5.33",
+    "querystring": "^0.2.1",
+    "randombytes": "^2.1.0",
+    "sha.js": "^2.4.11",
+    "tiny-date-picker": "^3.2.8",
+    "uuid": "^8.3.2"
+  },
+  "browser": "./dist/web/extension.js"
 }
