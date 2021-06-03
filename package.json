@@ -4,7 +4,7 @@
   "publisher": "tylerleonhardt",
   "description": "Interact with Microsoft To Do right in VS Code!",
   "version": "0.0.8",
-  "icon": "resources/icon.png",
+  "icon": "media/icon.png",
   "repository": {
     "url": "https://github.com/TylerLeonhardt/vscode-msft-todo-official"
   },
@@ -25,6 +25,10 @@
   ],
   "main": "./dist/extension.js",
   "browser": "./dist/web/extension.js",
+  "extensionKind": [
+    "ui",
+    "web"
+  ],
   "capabilities": {
     "virtualWorkspaces": true,
     "untrustedWorkspaces": {
@@ -116,7 +120,7 @@
         {
           "id": "microsoft-todo-unoffcial",
           "title": "Microsoft To Do (Unofficial)",
-          "icon": "./resources/dark/checklist.svg"
+          "icon": "$(checklist)"
         }
       ]
     },
