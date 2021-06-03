@@ -7,7 +7,9 @@ src/**
 vsc-extension-quickstart.md
 **/tsconfig.json
 **/.eslintrc.json
+**/*.config.js
 **/*.map
 **/*.ts
 **/*.vsix
 node_modules/**
+yarn.lock

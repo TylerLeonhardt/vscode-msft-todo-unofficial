@@ -42,94 +42,61 @@
         "command": "microsoft-todo-unoffcial.refreshList",
         "title": "Refresh",
         "category": "Microsoft To Do (Unofficial)",
-        "icon": {
-          "dark": "./resources/dark/refresh.svg",
-          "light": "./resources/light/refresh.svg"
-        }
+        "icon": "$(refresh)"
       },
       {
         "command": "microsoft-todo-unoffcial.complete",
         "title": "Complete task",
-        "icon": {
-          "dark": "./resources/dark/check.svg",
-          "light": "./resources/light/check.svg"
-        }
+        "icon": "$(check)"
       },
       {
         "command": "microsoft-todo-unoffcial.uncomplete",
         "title": "Uncomplete task",
-        "icon": {
-          "dark": "./resources/dark/check.svg",
-          "light": "./resources/light/check.svg"
-        }
+        "icon": "$(check)"
       },
       {
         "command": "microsoft-todo-unoffcial.star",
         "title": "Star task",
-        "icon": {
-          "dark": "./resources/dark/star-empty.svg",
-          "light": "./resources/light/star-empty.svg"
-        }
+        "icon": "$(star-empty)"
       },
       {
         "command": "microsoft-todo-unoffcial.unstar",
         "title": "Unstar task",
-        "icon": {
-          "dark": "./resources/dark/star-full.svg",
-          "light": "./resources/light/star-full.svg"
-        }
+        "icon": "$(star-full)"
       },
       {
         "command": "microsoft-todo-unoffcial.starFilter",
         "title": "Only show starred tasks",
         "category": "Microsoft To Do (Unofficial)",
-        "icon": {
-          "dark": "./resources/dark/star-empty.svg",
-          "light": "./resources/light/star-empty.svg"
-        }
+        "icon": "$(star-empty)"
       },
       {
         "command": "microsoft-todo-unoffcial.unstarFilter",
         "title": "Show all tasks",
         "category": "Microsoft To Do (Unofficial)",
-        "icon": {
-          "dark": "./resources/dark/star-full.svg",
-          "light": "./resources/light/star-full.svg"
-        }
+        "icon": "$(star-full)"
       },
       {
         "command": "microsoft-todo-unoffcial.createTask",
         "title": "Create tasks",
         "category": "Microsoft To Do (Unofficial)",
-        "icon": {
-          "dark": "./resources/dark/add.svg",
-          "light": "./resources/light/add.svg"
-        }
+        "icon": "$(add)"
       },
       {
         "command": "microsoft-todo-unoffcial.deleteTask",
         "title": "Delete task",
-        "icon": {
-          "dark": "./resources/dark/trash.svg",
-          "light": "./resources/light/trash.svg"
-        }
+        "icon": "$(trash)"
       },
       {
         "command": "microsoft-todo-unoffcial.createList",
         "title": "Create a list",
         "category": "Microsoft To Do (Unofficial)",
-        "icon": {
-          "dark": "./resources/dark/add.svg",
-          "light": "./resources/light/add.svg"
-        }
+        "icon": "$(add)"
       },
       {
         "command": "microsoft-todo-unoffcial.deleteList",
         "title": "Delete list",
-        "icon": {
-          "dark": "./resources/dark/trash.svg",
-          "light": "./resources/light/trash.svg"
-        }
+        "icon": "$(trash)"
       },
       {
         "command": "microsoft-todo-unoffcial.showTaskDetailsView",
