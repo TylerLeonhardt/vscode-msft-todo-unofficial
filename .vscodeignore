@@ -13,3 +13,7 @@ vsc-extension-quickstart.md
 **/*.vsix
 node_modules/**
 yarn.lock
+!node_modules/tiny-date-picker/tiny-date-picker.min.css
+!node_modules/tiny-date-picker/dist/tiny-date-picker.min.js
+!node_modules/moment/min/moment.min.js
+!node_modules/moment-timezone/builds/moment-timezone-with-data-10-year-range.min.js

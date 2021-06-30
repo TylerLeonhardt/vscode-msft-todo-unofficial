@@ -3,7 +3,7 @@
   "displayName": "Microsoft To Do (Unofficial)",
   "publisher": "tylerleonhardt",
   "description": "Interact with Microsoft To Do right in VS Code!",
-  "version": "0.0.10",
+  "version": "0.0.12",
   "icon": "media/icon.png",
   "repository": {
     "url": "https://github.com/TylerLeonhardt/vscode-msft-todo-official"
