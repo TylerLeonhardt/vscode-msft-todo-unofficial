@@ -3,7 +3,7 @@
   "displayName": "Microsoft To Do (Unofficial)",
   "publisher": "tylerleonhardt",
   "description": "Interact with Microsoft To Do right in VS Code!",
-  "version": "0.0.13",
+  "version": "0.0.14",
   "icon": "media/icon.png",
   "repository": {
     "url": "https://github.com/TylerLeonhardt/vscode-msft-todo-official"
@@ -268,7 +268,7 @@
     }
   },
   "scripts": {
-    "vscode:prepublish": "yarn run package",
+    "vscode:prepublish": "yarn run package && yarn run package-web",
     "compile": "webpack",
     "watch": "webpack --watch",
     "package": "webpack --mode production --devtool hidden-source-map",
