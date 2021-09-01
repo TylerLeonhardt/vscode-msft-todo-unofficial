@@ -26,8 +26,7 @@
   "main": "./dist/extension.js",
   "browser": "./dist/web/extension.js",
   "extensionKind": [
-    "ui",
-    "web"
+    "ui"
   ],
   "capabilities": {
     "virtualWorkspaces": true,
