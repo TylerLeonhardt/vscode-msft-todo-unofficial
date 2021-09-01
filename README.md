@@ -13,13 +13,4 @@ Interact with Microsoft To Do right in VS Code!
 ## Requirements
 
 * A Microsoft account
-
-## Known Issues
-
-You must use your Microsoft account to log in. Work or School accounts might work but it's not supported at this time.
-
-## Release Notes
-
-### 0.0.1
-
-Initial release!
+* A work or school account
