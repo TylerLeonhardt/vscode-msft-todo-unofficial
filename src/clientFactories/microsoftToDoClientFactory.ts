@@ -3,6 +3,7 @@ import * as vscode from 'vscode';
 
 export class MicrosoftToDoClientFactory {
 	static scopes: string[] = ['Tasks.ReadWrite', 'offline_access', 'openid', 'profile'];
+	static msa_scopes = ['VSCODE_CLIENT_ID:a4fd7674-4ebd-4dbc-831c-338314dd459e', 'VSCODE_TENANT:common', 'Tasks.ReadWrite', 'offline_access', 'openid', 'profile'];
 	private loginType: 'msa' | 'microsoft' | undefined;
 	private session: vscode.AuthenticationSession | undefined;
 
@@ -15,7 +16,7 @@ export class MicrosoftToDoClientFactory {
 			return;
 		}
 
-		this.session = await vscode.authentication.getSession(this.loginType, MicrosoftToDoClientFactory.scopes);
+		this.session = await vscode.authentication.getSession('microsoft', this.loginType === 'msa' ? MicrosoftToDoClientFactory.msa_scopes : MicrosoftToDoClientFactory.scopes);
 		if (!this.session) {
 			return;
 		}

@@ -5,15 +5,9 @@ import { TaskDetailsViewProvider } from './views/taskDetailsView';
 import { TaskOperations } from './commands/taskOperations';
 import { ListOperations } from './commands/listOperations';
 import 'cross-fetch/polyfill';
-import { MsaAuthProvider } from './clientFactories/MsaAuthProvider';
 
 export async function activate(context: vscode.ExtensionContext) {
 	console.log('Activating!');
-	const auth = new MsaAuthProvider(context);
-	await auth.initialize();
-	vscode.authentication.registerAuthenticationProvider(MsaAuthProvider.id, 'Microsoft Account (MSA)', auth, {
-		supportsMultipleAccounts: false
-	});
 
 	const clientProvider = new MicrosoftToDoClientFactory(context.globalState);
 	const loginType: { type?: 'msa' | 'microsoft' } | undefined = context.globalState.get('microsoftToDoUnofficialLoginType');
@@ -32,7 +26,7 @@ export async function activate(context: vscode.ExtensionContext) {
 			}
 
 			const provider = result === 'Microsoft account' ? 'msa' : 'microsoft';
-			await vscode.authentication.getSession(provider, MicrosoftToDoClientFactory.scopes, { createIfNone: true });
+			await vscode.authentication.getSession('microsoft', result === 'Microsoft account' ? MicrosoftToDoClientFactory.msa_scopes : MicrosoftToDoClientFactory.scopes, { createIfNone: true });
 			await context.globalState.update('microsoftToDoUnofficialLoginType', { type: provider });
 			clientProvider.setLoginType(provider);
 			vscode.commands.executeCommand('microsoft-todo-unoffcial.refreshList');

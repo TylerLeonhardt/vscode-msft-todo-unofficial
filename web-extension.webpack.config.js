@@ -23,15 +23,7 @@ module.exports = /** @type WebpackConfig */ {
 	resolve: {
 		mainFields: ['module', 'main'],
 		extensions: ['.ts', '.js'], // support ts-files and js-files
-		alias: {
-			'./env/node': path.resolve(__dirname, 'src/clientFactories/env/browser'),
-			'./authServer': path.resolve(__dirname, 'src/clientFactories/env/browser/authServer'),
-			'node-fetch': path.resolve(__dirname, 'node_modules/node-fetch/browser.js'),
-			'buffer': path.resolve(__dirname, 'node_modules/buffer/index.js'),
-			'randombytes': path.resolve(__dirname, 'node_modules/randombytes/browser.js'),
-			'stream': path.resolve(__dirname, 'node_modules/stream/index.js'),
-			'uuid': path.resolve(__dirname, 'node_modules/uuid/dist/esm-browser/index.js')
-		},
+		alias: {},
 		fallback: {
 			'assert': require.resolve('assert')
 		}
