@@ -23,7 +23,9 @@ module.exports = /** @type WebpackConfig */ {
 	resolve: {
 		mainFields: ['module', 'main'],
 		extensions: ['.ts', '.js'], // support ts-files and js-files
-		alias: {},
+		alias: {
+			'node-fetch': path.resolve(__dirname, 'node_modules/node-fetch/browser.js'),
+		},
 		fallback: {
 			'assert': require.resolve('assert')
 		}
