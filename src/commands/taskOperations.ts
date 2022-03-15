@@ -2,9 +2,15 @@ import { TodoTask, TodoTaskList } from '@microsoft/microsoft-graph-types';
 import * as vscode from 'vscode';
 import { MicrosoftToDoClientFactory } from '../clientFactories/microsoftToDoClientFactory';
 import { ListNode, TaskNode } from "../todoProviders/microsoftToDoTreeDataProvider";
+import * as dayjs from 'dayjs';
 
 export class TaskOperations extends vscode.Disposable {
 	private readonly disposables: vscode.Disposable[] = [];
+	private readonly remindOptions:  Array<vscode.QuickPickItem & { id?: string }> = [
+		{label: 'none'},{label: 'in 1h'},{label: 'in 1 day'},{label: 'in 3 days'}
+	];
+	private askForReminder = false;
+
 	constructor(private readonly clientProvider: MicrosoftToDoClientFactory) {
 		super(() => {
 			this.disposables.forEach(d => d.dispose());
@@ -42,6 +48,7 @@ export class TaskOperations extends vscode.Disposable {
 	}
 
 	async createTask(list: ListNode | undefined): Promise<any> {
+		this.askForReminder = vscode.workspace.getConfiguration("msft-todo-unofficial").get("askForReminders") || false;
 		const client = await this.clientProvider.getClient();
 		if (!client) {
 			return await vscode.window.showErrorMessage('Please log in before creating a task.');
@@ -113,13 +120,15 @@ export class TaskOperations extends vscode.Disposable {
 		let title = await vscode.window.showInputBox(inputBoxOptions);
 		inputBoxOptions.prompt = 'Add another Task';
 		while (title) {
+			let remindDate = this.askForReminder? await this.setupReminder(): undefined;
 			// TODO: error handling
 			await client.api(`/me/todo/lists/${listId}/tasks`).post({
 				title: title,
 				body: {
 					content: '',
 					contentType: 'text'
-				}
+				},
+				...(remindDate && {reminderDateTime: {dateTime:remindDate.toISOString(), timeZone: 'UTC'}}),
 			});
 
 			// not awaiting on purpose
@@ -157,5 +166,19 @@ export class TaskOperations extends vscode.Disposable {
 		await Promise.all(promises);
 
 		await vscode.commands.executeCommand('microsoft-todo-unoffcial.refreshList', task.parent);
+	}
+
+	async setupReminder(): Promise<dayjs.Dayjs|undefined> {
+		const remindTime: vscode.QuickPickItem = await vscode.window.showQuickPick(this.remindOptions, {canPickMany:false}) ?? {label:'none'};
+		switch (remindTime.label) {
+			case 'in 1h':
+				return dayjs().add(1, 'hour');
+			case 'in 1 day':	
+			    return dayjs().add(1, 'day');
+			case 'in 3 days':	
+    			return dayjs().add(3, 'day');
+			default:
+				return undefined;
+		}
 	}
 }
