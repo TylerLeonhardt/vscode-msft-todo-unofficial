@@ -288,7 +288,7 @@
     "@types/mocha": "^10.0.1",
     "@types/node": "^12.11.7",
     "@types/vscode": "^1.63.0",
-    "@types/webpack-env": "^1.16.0",
+    "@types/webpack-env": "^1.18.0",
     "@typescript-eslint/eslint-plugin": "^4.9.0",
     "@typescript-eslint/parser": "^4.33.0",
     "assert": "^2.0.0",
