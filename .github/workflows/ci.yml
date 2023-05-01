@@ -25,4 +25,4 @@ jobs:
     - uses: actions/upload-artifact@v3
       with:
         name: vsix
-        path: "tylerleonhardt.msft-todo-unofficial*.vsix"
+        path: "msft-todo-unofficial*.vsix"
