@@ -9,20 +9,12 @@
     "url": "https://github.com/TylerLeonhardt/vscode-msft-todo-official"
   },
   "engines": {
-    "vscode": "^1.64.0"
+    "vscode": "^1.74.0"
   },
   "categories": [
     "Other"
   ],
-  "activationEvents": [
-    "onView:microsoft-todo-unoffcial.listView",
-    "onCommand:microsoft-todo-unoffcial.login",
-    "onCommand:microsoft-todo-unoffcial.refreshList",
-    "onCommand:microsoft-todo-unoffcial.starFilter",
-    "onCommand:microsoft-todo-unoffcial.unstarFilter",
-    "onCommand:microsoft-todo-unoffcial.createTask",
-    "onCommand:microsoft-todo-unoffcial.createList"
-  ],
+  "activationEvents": [],
   "main": "./dist/extension.js",
   "browser": "./dist/web/extension.js",
   "extensionKind": [
@@ -271,13 +263,7 @@
     "compile": "webpack",
     "watch": "webpack --watch",
     "package": "webpack --mode production --devtool hidden-source-map",
-    "test-compile": "tsc -p ./",
-    "test-watch": "tsc -watch -p ./",
-    "pretest": "yarn run test-compile && yarn run lint",
     "lint": "eslint src --ext ts",
-    "test": "node ./out/test/runTest.js",
-    "test-web": "node ./dist/web/test/runTest.js",
-    "pretest-web": "npm run compile-web && tsc ./src/web/test/runTest.ts --outDir ./dist --rootDir ./src --target es6 --module commonjs",
     "compile-web": "webpack --config ./web-extension.webpack.config.js",
     "watch-web": "webpack --watch --config ./web-extension.webpack.config.js",
     "package-web": "webpack --mode production --devtool hidden-source-map --config ./web-extension.webpack.config.js"
@@ -298,7 +284,6 @@
     "process": "^0.11.10",
     "ts-loader": "^8.0.14",
     "typescript": "^5.0.4",
-    "vscode-test": "^1.6.1",
     "webpack": "^5.81.0",
     "webpack-cli": "^5.0.2"
   },
