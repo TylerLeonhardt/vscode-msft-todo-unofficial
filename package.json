@@ -288,7 +288,7 @@
     "webpack-cli": "^5.0.2"
   },
   "dependencies": {
-    "@microsoft/microsoft-graph-client": "^2.2.1",
+    "@microsoft/microsoft-graph-client": "^3.0.5",
     "cross-fetch": "^3.1.5",
     "moment": "^2.29.4",
     "moment-timezone": "^0.5.43",
