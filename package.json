@@ -272,7 +272,7 @@
     "@microsoft/microsoft-graph-types": "^1.28.0",
     "@types/glob": "^8.1.0",
     "@types/mocha": "^10.0.1",
-    "@types/node": "^18.16.3",
+    "@types/node": "^20.1.0",
     "@types/vscode": "^1.63.0",
     "@types/webpack-env": "^1.18.0",
     "@typescript-eslint/eslint-plugin": "^4.33.0",
