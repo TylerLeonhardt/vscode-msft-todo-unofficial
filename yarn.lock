@@ -117,10 +117,10 @@
     "@babel/runtime" "^7.12.5"
     tslib "^2.2.0"
 
-"@microsoft/microsoft-graph-types@^2.31.0":
-  version "2.31.0"
-  resolved "https://registry.yarnpkg.com/@microsoft/microsoft-graph-types/-/microsoft-graph-types-2.31.0.tgz#93fc31e5a86c7c402a8877580e8a8f3d29571006"
-  integrity sha512-ZEVraeRK3qmAs0sVenlEsoMKbNO4T960atGtZNYNWBd8MZ9KMeOF/+6HRVAYiGTRUo+WLlweMKXlDm+TDKGleQ==
+"@microsoft/microsoft-graph-types@^2.32.0":
+  version "2.32.0"
+  resolved "https://registry.yarnpkg.com/@microsoft/microsoft-graph-types/-/microsoft-graph-types-2.32.0.tgz#8ba72d6f377807fde6fad0f2c528b8e7ef393d8f"
+  integrity sha512-/eGp3ZFWpwh4psqqA3D7EKpadOofZBWfEb3DbS0ijTM0Ux0YllcGZSnG5X0JPTLS0C0/8IHL7uQmA4lM0pXzLQ==
 
 "@nodelib/fs.scandir@2.1.4":
   version "2.1.4"
