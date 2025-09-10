@@ -1,8 +1,8 @@
 {
   "name": "msft-todo-unofficial",
-  "displayName": "Microsoft To Do (Unofficial)",
+  "displayName": "To Do (Unofficial)",
   "publisher": "tylerleonhardt",
-  "description": "Interact with Microsoft To Do right in VS Code!",
+  "description": "Interact with To Do by that big tech company right in VS Code!",
   "version": "0.0.18",
   "icon": "media/icon.png",
   "repository": {
@@ -31,12 +31,12 @@
       {
         "command": "microsoft-todo-unoffcial.login",
         "title": "Login",
-        "category": "Microsoft To Do (Unofficial)"
+        "category": "To Do (Unofficial)"
       },
       {
         "command": "microsoft-todo-unoffcial.refreshList",
         "title": "Refresh",
-        "category": "Microsoft To Do (Unofficial)",
+        "category": "To Do (Unofficial)",
         "icon": "$(refresh)"
       },
       {
@@ -62,19 +62,19 @@
       {
         "command": "microsoft-todo-unoffcial.starFilter",
         "title": "Only show starred tasks",
-        "category": "Microsoft To Do (Unofficial)",
+        "category": "To Do (Unofficial)",
         "icon": "$(star-empty)"
       },
       {
         "command": "microsoft-todo-unoffcial.unstarFilter",
         "title": "Show all tasks",
-        "category": "Microsoft To Do (Unofficial)",
+        "category": "To Do (Unofficial)",
         "icon": "$(star-full)"
       },
       {
         "command": "microsoft-todo-unoffcial.createTask",
         "title": "Create tasks",
-        "category": "Microsoft To Do (Unofficial)",
+        "category": "To Do (Unofficial)",
         "icon": "$(add)"
       },
       {
@@ -85,7 +85,7 @@
       {
         "command": "microsoft-todo-unoffcial.createList",
         "title": "Create a list",
-        "category": "Microsoft To Do (Unofficial)",
+        "category": "To Do (Unofficial)",
         "icon": "$(add)"
       },
       {
@@ -96,12 +96,12 @@
       {
         "command": "microsoft-todo-unoffcial.showTaskDetailsView",
         "title": "Show task details view",
-        "category": "Microsoft To Do (Unofficial)"
+        "category": "To Do (Unofficial)"
       },
       {
         "command": "microsoft-todo-unoffcial.hideTaskDetailsView",
         "title": "Hide task details view",
-        "category": "Microsoft To Do (Unofficial)",
+        "category": "To Do (Unofficial)",
         "icon": "$(close)"
       }
     ],
@@ -110,7 +110,7 @@
       "activitybar": [
         {
           "id": "microsoft-todo-unoffcial",
-          "title": "Microsoft To Do (Unofficial)",
+          "title": "To Do (Unofficial)",
           "icon": "$(checklist)"
         }
       ]
@@ -119,7 +119,7 @@
       "microsoft-todo-unoffcial": [
         {
           "id": "microsoft-todo-unoffcial.listView",
-          "name": "Microsoft To Do",
+          "name": "To Do",
           "type": "tree",
           "visibility": "visible"
         },
@@ -136,7 +136,7 @@
     "viewsWelcome": [
       {
         "view": "microsoft-todo-unoffcial.listView",
-        "contents": "Login to see your Microsoft To Do lists.\n[Login](command:microsoft-todo-unoffcial.login)"
+        "contents": "Login to see your To Do lists.\n[Login](command:microsoft-todo-unoffcial.login)"
       }
     ],
     "menus": {

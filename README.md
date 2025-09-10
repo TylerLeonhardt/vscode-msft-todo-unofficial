@@ -1,4 +1,4 @@
-# Microsoft To Do (Unofficial)
+# To Do (Unofficial)
 
 Interact with Microsoft To Do right in VS Code!
 
