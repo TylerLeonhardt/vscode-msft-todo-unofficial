@@ -3,7 +3,7 @@
   "displayName": "To Do (Unofficial)",
   "publisher": "tylerleonhardt",
   "description": "Interact with To Do by that big tech company right in VS Code!",
-  "version": "0.0.19",
+  "version": "0.0.20",
   "icon": "media/icon.png",
   "repository": {
     "url": "https://github.com/TylerLeonhardt/vscode-msft-todo-official"
